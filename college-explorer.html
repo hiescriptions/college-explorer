@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,339 +7,326 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
+/* ══ LIGHT MODE (default) ══ */
 :root {
-  --bg: #f5f5f7;
-  --sidebar-bg: #ffffff;
-  --card: #f5f5f7;
-  --card-hover: #ebebed;
-  --border: #d2d2d7;
-  --text: #1d1d1f;
-  --muted: #6e6e73;
-  --accent: #0071e3;
-  --accent-h: #0077ed;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 20px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-pill: 100px;
+  --bg:         #f5f5f7;
+  --panel-bg:   #ffffff;
+  --card:       #f5f5f7;
+  --card-hover: #e8e8ed;
+  --border:     #d2d2d7;
+  --text:       #1d1d1f;
+  --text2:      #3a3a3c;
+  --muted:      #6e6e73;
+  --accent:     #0071e3;
+  --accent-h:   #0077ed;
+  --map-tiles:  light;
+  --shadow:     0 2px 12px rgba(0,0,0,0.09), 0 1px 3px rgba(0,0,0,0.06);
+  --logo-bg:    #f0f0f5;
 }
+
+/* ══ DARK MODE ══ */
+[data-theme="dark"] {
+  --bg:         #0d1117;
+  --panel-bg:   #161b22;
+  --card:       #1c2128;
+  --card-hover: #262d38;
+  --border:     #30363d;
+  --text:       #e6edf3;
+  --text2:      #c9d1d9;
+  --muted:      #8b949e;
+  --accent:     #58a6ff;
+  --accent-h:   #79b8ff;
+  --shadow:     0 2px 12px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+  --logo-bg:    #1c2128;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
   background: var(--bg); color: var(--text);
   display: flex; height: 100vh; overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  transition: background 0.25s, color 0.25s;
 }
 
-/* ── LEFT SIDEBAR ── */
+/* ══ LEFT SIDEBAR ══ */
 #sidebar {
   width: 300px; min-width: 300px;
-  background: var(--sidebar-bg);
+  background: var(--panel-bg);
   display: flex; flex-direction: column; overflow: hidden;
   border-right: 1px solid var(--border);
   z-index: 10;
+  transition: background 0.25s, border-color 0.25s;
 }
-#sidebar-header {
-  padding: 18px 16px 14px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.header-top { display: flex; align-items: center; gap: 9px; margin-bottom: 3px; }
-.cedar-icon { font-size: 1.5rem; line-height: 1; }
-#sidebar-header h1 { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.3px; }
-#sidebar-header p  { font-size: 0.7rem; color: var(--muted); padding-left: 38px; }
 
-/* ── FILTERS ── */
+#sidebar-header {
+  padding: 14px 14px 11px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.header-top { display: flex; align-items: center; gap: 8px; }
+.cedar-icon { font-size: 1.4rem; line-height: 1; flex-shrink: 0; }
+.header-title { flex: 1; min-width: 0; }
+#sidebar-header h1 { font-size: 0.98rem; font-weight: 700; letter-spacing: -0.3px; }
+#sidebar-header p  { font-size: 0.67rem; color: var(--muted); margin-top: 2px; }
+
+/* Theme toggle */
+#theme-toggle {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--card);
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: center; font-size: 0.9rem;
+  transition: all 0.15s; flex-shrink: 0;
+  font-family: inherit;
+}
+#theme-toggle:hover { background: var(--card-hover); transform: scale(1.1); }
+
+/* ══ FILTERS ══ */
 #filter-area {
-  padding: 12px 14px 10px;
+  padding: 11px 13px 9px;
   flex-shrink: 0;
   border-bottom: 1px solid var(--border);
 }
-.filter-group { margin-bottom: 10px; }
+.filter-group { margin-bottom: 9px; }
 .filter-group:last-child { margin-bottom: 0; }
 .filter-group-label {
-  font-size: 0.6rem; font-weight: 600; text-transform: uppercase;
+  font-size: 0.59rem; font-weight: 600; text-transform: uppercase;
   letter-spacing: 0.8px; color: var(--muted); margin-bottom: 5px;
 }
 .filter-chips { display: flex; flex-wrap: wrap; gap: 4px; }
 .chip {
-  padding: 4px 10px; border-radius: var(--radius-pill);
-  font-size: 0.72rem; font-weight: 500; border: 1.5px solid;
-  cursor: pointer; transition: all 0.15s; background: transparent;
+  padding: 4px 9px; border-radius: 100px; font-size: 0.7rem;
+  font-weight: 500; border: 1.5px solid; cursor: pointer;
+  transition: all 0.15s; background: transparent;
   display: inline-flex; align-items: center; gap: 3px;
   font-family: inherit;
 }
-.chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.chip:hover { transform: translateY(-1px); }
 .chip:active { transform: scale(0.96); }
 .chip.active { color: #fff !important; }
 
-.chip-ca    { border-color: #e8820c; color: #c96800; } .chip-ca.active    { background: #e8820c; border-color: #e8820c; }
-.chip-uc    { border-color: #006fce; color: #005db5; } .chip-uc.active    { background: #006fce; border-color: #006fce; }
-.chip-csu   { border-color: #1a9244; color: #157838; } .chip-csu.active   { background: #1a9244; border-color: #1a9244; }
-.chip-priv  { border-color: #7635d4; color: #6228be; } .chip-priv.active  { background: #7635d4; border-color: #7635d4; }
-.chip-pres  { border-color: #c9930a; color: #a87a00; } .chip-pres.active  { background: #c9930a; border-color: #c9930a; }
-.chip-jp    { border-color: #d4006e; color: #b5005d; } .chip-jp.active    { background: #d4006e; border-color: #d4006e; }
-.chip-cog   { border-color: #00897b; color: #00695c; } .chip-cog.active   { background: #00897b; border-color: #00897b; }
-.chip-liked { border-color: #e03131; color: #c92a2a; } .chip-liked.active { background: #e03131; border-color: #e03131; }
+.chip-ca   { border-color:#e8820c;color:#c96800; } .chip-ca.active   { background:#e8820c;border-color:#e8820c; }
+.chip-uc   { border-color:#006fce;color:#005db5; } .chip-uc.active   { background:#006fce;border-color:#006fce; }
+.chip-csu  { border-color:#1a9244;color:#157838; } .chip-csu.active  { background:#1a9244;border-color:#1a9244; }
+.chip-priv { border-color:#7635d4;color:#6228be; } .chip-priv.active { background:#7635d4;border-color:#7635d4; }
+.chip-pres { border-color:#c9930a;color:#a87a00; } .chip-pres.active { background:#c9930a;border-color:#c9930a; }
+.chip-jp   { border-color:#d4006e;color:#b5005d; } .chip-jp.active   { background:#d4006e;border-color:#d4006e; }
+.chip-cog  { border-color:#00897b;color:#00695c; } .chip-cog.active  { background:#00897b;border-color:#00897b; }
+.chip-liked{ border-color:#e03131;color:#c92a2a; } .chip-liked.active{ background:#e03131;border-color:#e03131; }
 
-#filter-note { font-size: 0.65rem; color: var(--muted); margin-top: 6px; }
+#filter-note { font-size: 0.62rem; color: var(--muted); margin-top: 5px; }
 #clear-btn {
-  display: block; width: 100%; margin-top: 8px; padding: 6px;
+  display: block; width: 100%; margin-top: 7px; padding: 5px;
   background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); color: var(--muted);
-  font-size: 0.75rem; cursor: pointer; font-family: inherit;
-  font-weight: 500; transition: all 0.15s;
+  border-radius: 7px; color: var(--muted); font-size: 0.72rem;
+  cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.15s;
 }
 #clear-btn:hover { background: var(--card-hover); color: var(--text); }
 
-/* ── SCHOOL LIST ── */
+/* ══ SCHOOL LIST ══ */
 #list-header {
-  padding: 7px 14px; font-size: 0.7rem; color: var(--muted);
+  padding: 6px 13px; font-size: 0.68rem; color: var(--muted);
   font-weight: 500; border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
 #school-list { overflow-y: auto; flex: 1; }
 .school-row {
-  padding: 9px 12px; border-bottom: 1px solid var(--border);
+  padding: 8px 11px; border-bottom: 1px solid var(--border);
   cursor: pointer; transition: background 0.1s;
   display: flex; align-items: center; gap: 8px;
+  background: var(--panel-bg);
 }
-.school-row:hover     { background: #fafafa; }
-.school-row.highlight { background: #e8f0fb; }
-.sr-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.school-row:hover     { background: var(--card); }
+.school-row.highlight { background: rgba(0,113,227,0.1); }
+[data-theme="dark"] .school-row.highlight { background: rgba(88,166,255,0.12); }
+
+.sr-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .sr-info { flex: 1; min-width: 0; }
-.sr-name { font-size: 0.82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.2px; }
-.sr-loc  { font-size: 0.68rem; color: var(--muted); margin-top: 1px; }
-.sr-tags { display: flex; gap: 3px; margin-top: 4px; flex-wrap: wrap; }
-.mini-tag { font-size: 0.58rem; padding: 1px 6px; border-radius: 5px; font-weight: 500; }
+.sr-name { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.1px; }
+.sr-loc  { font-size: 0.66rem; color: var(--muted); margin-top: 1px; }
+.sr-tags { display: flex; gap: 3px; margin-top: 3px; flex-wrap: wrap; }
+.mini-tag { font-size: 0.57rem; padding: 1px 5px; border-radius: 4px; font-weight: 500; }
 .like-btn {
-  background: none; border: none; cursor: pointer; font-size: 1rem;
+  background: none; border: none; cursor: pointer; font-size: 0.95rem;
   padding: 3px; border-radius: 50%; transition: all 0.15s;
-  flex-shrink: 0; color: #ccc; line-height: 1;
+  flex-shrink: 0; color: var(--border); line-height: 1;
 }
 .like-btn:hover { transform: scale(1.2); color: #e03131; }
 .like-btn.liked { color: #e03131; }
 
 #empty-state {
   display: none; padding: 28px 16px; text-align: center;
-  color: var(--muted); font-size: 0.82rem;
+  color: var(--muted); font-size: 0.8rem;
 }
-#empty-state .ei { font-size: 2rem; margin-bottom: 8px; }
 
-/* ── MAP ── */
+/* ══ MAP ══ */
 #map { flex: 1; }
 
-/* Leaflet popup */
+/* Leaflet popup — adapts to theme */
 .leaflet-popup-content-wrapper {
-  background: rgba(255,255,255,0.96);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
+  background: var(--panel-bg) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 10px !important;
-  box-shadow: var(--shadow-md);
-  color: var(--text);
+  box-shadow: var(--shadow) !important;
+  color: var(--text) !important;
 }
-.leaflet-popup-tip { background: white; }
-.leaflet-popup-content { margin: 10px 14px; font-family: -apple-system, sans-serif; }
-.map-popup-name { font-weight: 700; font-size: 0.9rem; letter-spacing: -0.2px; }
-.map-popup-sub  { font-size: 0.72rem; color: var(--muted); margin: 2px 0 8px; }
-.map-popup-btn {
-  display: block; padding: 6px 12px; background: var(--accent);
-  color: white; border-radius: 7px; font-size: 0.78rem;
-  font-weight: 600; cursor: pointer; border: none;
-  font-family: inherit; width: 100%; text-align: center; transition: background 0.15s;
-}
-.map-popup-btn:hover { background: var(--accent-h); }
+.leaflet-popup-tip { background: var(--panel-bg) !important; }
+.leaflet-popup-content { margin: 10px 14px !important; font-family: -apple-system, sans-serif; }
+.map-popup-name { font-weight: 700; font-size: 0.88rem; letter-spacing: -0.2px; color: var(--text); }
+.map-popup-sub  { font-size: 0.7rem; color: var(--muted); margin: 2px 0 0; }
 
-/* ── RIGHT DETAIL PANEL ── */
+/* ══ RIGHT DETAIL PANEL ══ */
 #detail-panel {
-  width: 0;
-  min-width: 0;
-  background: var(--sidebar-bg);
+  width: 0; min-width: 0;
+  background: var(--panel-bg);
   border-left: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; flex-direction: column; overflow: hidden;
+  transition: width 0.3s cubic-bezier(0.4,0,0.2,1), min-width 0.3s cubic-bezier(0.4,0,0.2,1);
   z-index: 10;
 }
-#detail-panel.open {
-  width: 420px;
-  min-width: 420px;
-}
+#detail-panel.open { width: 420px; min-width: 420px; }
 #detail-scroll { overflow-y: auto; flex: 1; }
 
-/* Panel header */
+/* Panel sticky header */
 #dp-header {
-  padding: 14px 16px 12px;
+  padding: 13px 15px 11px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   position: sticky; top: 0;
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(16px);
+  background: var(--panel-bg);
   z-index: 2;
 }
-.dp-header-top {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 2px;
+.dp-header-top { display: flex; align-items: center; gap: 9px; }
+
+/* School logo */
+.dp-logo-wrap {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: var(--logo-bg); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; flex-shrink: 0;
 }
-#dp-logo {
-  width: 42px; height: 42px; border-radius: 10px;
-  object-fit: contain; background: var(--card);
-  border: 1px solid var(--border); flex-shrink: 0;
-  padding: 4px;
+.dp-logo-wrap img {
+  width: 36px; height: 36px; object-fit: contain; display: block;
 }
-#dp-logo-fallback {
-  width: 42px; height: 42px; border-radius: 10px;
-  background: var(--accent); color: white;
-  display: none; align-items: center; justify-content: center;
-  font-size: 0.75rem; font-weight: 800; flex-shrink: 0;
-  letter-spacing: -0.5px;
+.dp-logo-text {
+  font-size: 0.65rem; font-weight: 800; color: white;
+  width: 44px; height: 44px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  letter-spacing: -0.5px; flex-shrink: 0;
 }
+
 .dp-title-area { flex: 1; min-width: 0; }
-#dp-name { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#dp-loc  { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
-.dp-hdr-btns { display: flex; gap: 6px; flex-shrink: 0; }
+#dp-name { font-size: 1rem; font-weight: 700; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#dp-loc  { font-size: 0.69rem; color: var(--muted); margin-top: 2px; }
+#dp-type { font-size: 0.67rem; color: var(--accent); font-weight: 500; margin-top: 1px; }
+
+.dp-hdr-btns { display: flex; gap: 5px; flex-shrink: 0; }
 .dp-icon-btn {
-  width: 32px; height: 32px; border-radius: 50%;
+  width: 30px; height: 30px; border-radius: 50%;
   border: 1px solid var(--border); background: var(--card);
-  cursor: pointer; display: flex; align-items: center;
-  justify-content: center; font-size: 0.95rem; transition: all 0.15s;
-  font-family: inherit;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; transition: all 0.15s; font-family: inherit;
 }
 .dp-icon-btn:hover { background: var(--card-hover); }
-#dp-like-btn.liked { color: #e03131; border-color: #e03131; background: #fff0f0; }
-#dp-type { font-size: 0.7rem; color: var(--accent); font-weight: 500; margin-top: 2px; }
+#dp-like-btn.liked { color: #e03131; border-color: #e03131; background: rgba(224,49,49,0.08); }
 
-/* Video section */
-#dp-video-section { padding: 14px 16px 0; }
-.video-container {
-  border-radius: 10px; overflow: hidden; position: relative;
-  background: #1a1a1a; aspect-ratio: 16/9;
-  cursor: pointer;
+/* ══ VIDEO SECTION ══ */
+#dp-video-section { padding: 13px 15px 0; }
+.yt-card {
+  border-radius: 10px; overflow: hidden;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 24px 20px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 12px; text-align: center;
 }
-.video-thumb {
-  width: 100%; height: 100%; object-fit: cover;
-  display: block; transition: filter 0.2s;
-}
-.video-container:hover .video-thumb { filter: brightness(0.85); }
-.play-overlay {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 8px;
-}
-.play-circle {
-  width: 52px; height: 52px; border-radius: 50%;
-  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.3rem; transition: transform 0.15s, background 0.15s;
-  border: 2px solid rgba(255,255,255,0.3);
-}
-.video-container:hover .play-circle { transform: scale(1.1); background: rgba(0,0,0,0.85); }
-.play-label {
-  font-size: 0.72rem; color: rgba(255,255,255,0.9);
-  font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.6);
-}
-.video-container iframe {
-  position: absolute; inset: 0; width: 100%; height: 100%; border: none;
-}
-.video-no-thumb {
-  width: 100%; height: 100%;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 10px;
-}
-.video-no-thumb .play-circle { width: 56px; height: 56px; font-size: 1.4rem; }
-.video-no-thumb .vnt-label { font-size: 0.8rem; color: rgba(255,255,255,0.7); font-weight: 500; }
-.yt-open-btn {
-  padding: 6px 16px; background: #ff0000; color: white;
-  border-radius: 7px; font-size: 0.75rem; font-weight: 600;
+.yt-card-icon { font-size: 2.2rem; }
+.yt-card-title { font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.9); }
+.yt-card-sub   { font-size: 0.7rem; color: rgba(255,255,255,0.55); }
+.yt-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 18px; background: #ff0000; color: white;
+  border-radius: 8px; font-size: 0.78rem; font-weight: 700;
+  text-decoration: none; transition: background 0.15s, transform 0.1s;
   border: none; cursor: pointer; font-family: inherit;
-  text-decoration: none; display: inline-block; transition: background 0.15s;
 }
-.yt-open-btn:hover { background: #cc0000; }
+.yt-btn:hover { background: #d90000; transform: scale(1.03); }
+.yt-btn-icon { font-size: 1rem; }
 
-/* Stats grid */
-#dp-stats { padding: 14px 16px 0; }
-.stat-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
+/* ══ STATS ══ */
+#dp-stats { padding: 13px 15px 0; }
+.stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
 .stat-box {
   background: var(--card); border-radius: 9px;
-  padding: 10px 11px; border: 1px solid var(--border);
+  padding: 9px 10px; border: 1px solid var(--border);
 }
-.stat-label { font-size: 0.58rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
-.stat-val   { font-size: 0.88rem; font-weight: 600; margin-top: 3px; letter-spacing: -0.2px; }
-.stat-note  { font-size: 0.58rem; color: var(--muted); margin-top: 1px; }
+.stat-label { font-size: 0.56rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
+.stat-val   { font-size: 0.86rem; font-weight: 700; margin-top: 3px; letter-spacing: -0.2px; }
+.stat-note  { font-size: 0.56rem; color: var(--muted); margin-top: 1px; }
 
-/* Tags */
-#dp-tags { padding: 12px 16px 0; display: flex; flex-wrap: wrap; gap: 5px; }
-.dp-tag {
-  font-size: 0.68rem; padding: 3px 9px; border-radius: 7px;
-  font-weight: 500; border: 1.5px solid;
-}
+/* ══ TAGS ══ */
+#dp-tags { padding: 11px 15px 0; display: flex; flex-wrap: wrap; gap: 5px; }
+.dp-tag  { font-size: 0.67rem; padding: 3px 9px; border-radius: 6px; font-weight: 500; border: 1.5px solid; }
 
-/* Sections */
-.dp-section { padding: 14px 16px 0; }
+/* ══ SECTIONS ══ */
+.dp-section { padding: 13px 15px 0; }
 .dp-section-title {
-  font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.8px; color: var(--muted); margin-bottom: 8px;
+  font-size: 0.59rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--muted); margin-bottom: 7px;
 }
-#dp-desc {
-  font-size: 0.83rem; line-height: 1.65; color: #3a3a3c;
-}
-#dp-programs {
-  display: flex; flex-wrap: wrap; gap: 5px;
-}
-.program-tag {
-  font-size: 0.72rem; padding: 4px 10px; border-radius: 7px;
-  background: var(--card); border: 1px solid var(--border); color: var(--text);
-  font-weight: 500;
+#dp-desc { font-size: 0.81rem; line-height: 1.65; color: var(--text2); }
+#dp-programs { display: flex; flex-wrap: wrap; gap: 5px; }
+.prog-tag {
+  font-size: 0.7rem; padding: 4px 9px; border-radius: 6px;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text); font-weight: 500;
 }
 
-/* Actions */
-#dp-actions { padding: 16px; display: flex; gap: 8px; flex-shrink: 0; }
+/* ══ ACTIONS ══ */
+#dp-actions { padding: 14px 15px 15px; display: flex; gap: 8px; }
 .btn-main {
   flex: 1; padding: 10px; background: var(--accent); color: white;
-  border: none; border-radius: 9px; font-size: 0.82rem; font-weight: 600;
+  border: none; border-radius: 9px; font-size: 0.8rem; font-weight: 600;
   cursor: pointer; text-decoration: none; text-align: center;
   font-family: inherit; transition: background 0.15s;
 }
 .btn-main:hover { background: var(--accent-h); }
 .btn-sec {
   flex: 1; padding: 10px; background: var(--card); color: var(--text);
-  border: 1px solid var(--border); border-radius: 9px; font-size: 0.82rem;
+  border: 1px solid var(--border); border-radius: 9px; font-size: 0.8rem;
   font-weight: 600; cursor: pointer; text-decoration: none; text-align: center;
   font-family: inherit; transition: all 0.15s;
 }
 .btn-sec:hover { background: var(--card-hover); }
 
-/* Map pins */
+/* ══ MAP PINS ══ */
 .pin {
   width: 30px; height: 30px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.58rem; font-weight: 800; color: white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.22), 0 0 0 2px rgba(255,255,255,0.85);
+  font-size: 0.57rem; font-weight: 800; color: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25), 0 0 0 2.5px rgba(255,255,255,0.85);
   cursor: pointer; transition: transform 0.15s; letter-spacing: -0.5px;
 }
-.pin:hover { transform: scale(1.22); }
+.pin:hover { transform: scale(1.25); }
+[data-theme="dark"] .pin { box-shadow: 0 2px 6px rgba(0,0,0,0.5), 0 0 0 2px rgba(255,255,255,0.4); }
 
-/* Scrollbar */
+/* ══ SCROLLBAR ══ */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #b0b0b8; }
 </style>
 </head>
 <body>
 
-<!-- ── LEFT SIDEBAR ── -->
+<!-- ══ LEFT SIDEBAR ══ -->
 <div id="sidebar">
   <div id="sidebar-header">
     <div class="header-top">
       <span class="cedar-icon">🌲</span>
-      <h1>Cedar's College Explorer</h1>
+      <div class="header-title">
+        <h1>Cedar's College Explorer</h1>
+        <p>Click a school to explore · ❤ to save favorites</p>
+      </div>
+      <button id="theme-toggle" title="Toggle dark/light mode">☀️</button>
     </div>
-    <p>Click a school to explore · ❤ to save favorites</p>
   </div>
 
   <div id="filter-area">
@@ -368,7 +355,7 @@ body {
     <div class="filter-group">
       <div class="filter-group-label">My List</div>
       <div class="filter-chips">
-        <button class="chip chip-liked" data-f="liked" id="liked-chip">❤️ Liked <span id="like-count-badge"></span></button>
+        <button class="chip chip-liked" data-f="liked">❤️ Liked <span id="like-count-badge"></span></button>
       </div>
     </div>
     <div id="filter-note">All active filters must match (AND)</div>
@@ -378,23 +365,25 @@ body {
   <div id="list-header">Showing <span id="count">0</span> schools</div>
   <div id="school-list"></div>
   <div id="empty-state">
-    <div class="ei">🔍</div>
-    <div>No schools match your filters.</div>
-    <div style="margin-top:4px;font-size:0.72rem;">Try removing a filter.</div>
+    <div style="font-size:1.8rem;margin-bottom:8px;">🔍</div>
+    No schools match your filters.<br>
+    <span style="font-size:0.72rem;">Try removing a filter.</span>
   </div>
 </div>
 
-<!-- ── MAP ── -->
+<!-- ══ MAP ══ -->
 <div id="map"></div>
 
-<!-- ── RIGHT DETAIL PANEL ── -->
+<!-- ══ RIGHT DETAIL PANEL ══ -->
 <div id="detail-panel">
   <div id="detail-scroll">
 
+    <!-- Header -->
     <div id="dp-header">
       <div class="dp-header-top">
-        <img id="dp-logo" src="" alt="" onerror="this.style.display='none';document.getElementById('dp-logo-fallback').style.display='flex'"/>
-        <div id="dp-logo-fallback"></div>
+        <div id="dp-logo-wrap" class="dp-logo-wrap">
+          <img id="dp-logo" src="" alt=""/>
+        </div>
         <div class="dp-title-area">
           <div id="dp-name"></div>
           <div id="dp-loc"></div>
@@ -407,40 +396,48 @@ body {
       </div>
     </div>
 
+    <!-- YouTube link card -->
     <div id="dp-video-section"></div>
+
+    <!-- Stats -->
     <div id="dp-stats"><div class="stat-grid" id="dp-stat-grid"></div></div>
+
+    <!-- Tags -->
     <div id="dp-tags"></div>
 
+    <!-- Notable Programs -->
     <div class="dp-section">
       <div class="dp-section-title">Notable Programs</div>
       <div id="dp-programs"></div>
     </div>
 
+    <!-- About -->
     <div class="dp-section">
       <div class="dp-section-title">About</div>
       <div id="dp-desc"></div>
     </div>
 
+    <!-- Action buttons -->
     <div id="dp-actions">
       <a class="btn-main" id="dp-website" href="#" target="_blank" rel="noopener">Visit Website →</a>
       <a class="btn-sec"  id="dp-apply"   href="#" target="_blank" rel="noopener">Apply / Admissions</a>
     </div>
 
-  </div>
-</div>
+  </div><!-- /detail-scroll -->
+</div><!-- /detail-panel -->
 
 <script>
 // ══════════════════════════════════════════════
 //  TAGS
 // ══════════════════════════════════════════════
 const TAGS = {
-  ca:    { label:"California",    color:"#e8820c" },
-  uc:    { label:"UC System",     color:"#006fce" },
-  csu:   { label:"Cal State",     color:"#1a9244" },
-  priv:  { label:"Private",       color:"#7635d4" },
-  pres:  { label:"Top Ranked",    color:"#c9930a" },
-  jp:    { label:"Japanese Lang", color:"#d4006e" },
-  cog:   { label:"Cognitive Sci", color:"#00897b" },
+  ca:   { label:"California",    color:"#e8820c" },
+  uc:   { label:"UC System",     color:"#006fce" },
+  csu:  { label:"Cal State",     color:"#1a9244" },
+  priv: { label:"Private",       color:"#7635d4" },
+  pres: { label:"Top Ranked",    color:"#c9930a" },
+  jp:   { label:"Japanese Lang", color:"#d4006e" },
+  cog:  { label:"Cognitive Sci", color:"#00897b" },
 };
 
 function markerColor(tags) {
@@ -453,656 +450,614 @@ function markerColor(tags) {
 
 // ══════════════════════════════════════════════
 //  SCHOOL DATA
-//  videoId: YouTube ID (null = show search)
-//  gpa: avg admitted unweighted GPA
-//  sat: middle 50% SAT range
-//  echs: est. El Cerrito HS grads/yr
-//  programs: notable areas of study
 // ══════════════════════════════════════════════
 const SCHOOLS = [
 {
-  id:1, name:"UC Berkeley", abbr:"UCB",
-  lat:37.8724, lng:-122.2595,
+  id:1,name:"UC Berkeley",abbr:"UCB",lat:37.8724,lng:-122.2595,
   tags:["ca","uc","pres","jp","cog"],
-  city:"Berkeley, CA", type:"Public Research University", founded:1868,
-  enrollment:"~45,000", acceptance:"~11%", tuition:"$14K / $44K",
-  gpa:"3.89", sat:"1310–1530", echs:"~15–20",
-  logo:"https://logo.clearbit.com/berkeley.edu",
-  videoId:"K3DBuIkLEpE",
-  ytq:"UC Berkeley campus tour official",
+  city:"Berkeley, CA",type:"Public Research University",founded:1868,
+  enrollment:"~45,000",acceptance:"~11%",tuition:"$14K / $44K",
+  gpa:"3.89",sat:"1310–1530",echs:"~15–20",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=berkeley.edu",
+  ytq:"UC Berkeley campus tour official admissions",
   programs:["Cognitive Science","Japanese Studies","Computer Science","Engineering","Business (Haas)","Pre-Med","Political Science"],
-  desc:"UC Berkeley is the world-renowned flagship of the UC system with 107 affiliated Nobel laureates. Consistently ranked among the top public universities globally, Cal offers an electric intellectual atmosphere in the Bay Area. The Cognitive Science major is one of the oldest in the nation. Japanese language and literature are taught through the Department of East Asian Languages and Cultures.",
-  website:"https://www.berkeley.edu", apply:"https://admissions.berkeley.edu"
+  desc:"UC Berkeley is the world-renowned flagship of the UC system with 107 affiliated Nobel laureates. Consistently ranked among the top public universities globally, Cal offers an electric intellectual atmosphere in the Bay Area. The Cognitive Science major is one of the oldest in the nation. Japanese language and literature are taught through the prestigious Department of East Asian Languages and Cultures.",
+  website:"https://www.berkeley.edu",apply:"https://admissions.berkeley.edu"
 },
 {
-  id:2, name:"UCLA", abbr:"UCLA",
-  lat:34.0689, lng:-118.4452,
+  id:2,name:"UCLA",abbr:"UCLA",lat:34.0689,lng:-118.4452,
   tags:["ca","uc","pres","jp","cog"],
-  city:"Los Angeles, CA", type:"Public Research University", founded:1919,
-  enrollment:"~47,000", acceptance:"~9%", tuition:"$14K / $44K",
-  gpa:"3.90", sat:"1290–1510", echs:"~8–13",
-  logo:"https://logo.clearbit.com/ucla.edu",
-  videoId:"YoOKFtq0JOk",
-  ytq:"UCLA campus tour official",
+  city:"Los Angeles, CA",type:"Public Research University",founded:1919,
+  enrollment:"~47,000",acceptance:"~9%",tuition:"$14K / $44K",
+  gpa:"3.90",sat:"1290–1510",echs:"~8–13",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=ucla.edu",
+  ytq:"UCLA campus tour official admissions",
   programs:["Cognitive Science","Asian Languages & Cultures","Film & TV","Pre-Law","Business (Anderson)","Public Health","Psychology"],
   desc:"UCLA is the most applied-to university in the US and a perennial top-10 national university. Nestled in Westwood between the Santa Monica Mountains and the Pacific, it offers world-class research, Division I athletics, and unmatched access to LA's entertainment and tech industries. The interdisciplinary Cognitive Science program and the Department of Asian Languages and Cultures both attract top students.",
-  website:"https://www.ucla.edu", apply:"https://admission.ucla.edu"
+  website:"https://www.ucla.edu",apply:"https://admission.ucla.edu"
 },
 {
-  id:3, name:"UC San Diego", abbr:"UCSD",
-  lat:32.8801, lng:-117.2340,
+  id:3,name:"UC San Diego",abbr:"UCSD",lat:32.8801,lng:-117.2340,
   tags:["ca","uc","pres","jp","cog"],
-  city:"La Jolla, CA", type:"Public Research University", founded:1960,
-  enrollment:"~40,000", acceptance:"~24%", tuition:"$15K / $45K",
-  gpa:"3.87", sat:"1280–1500", echs:"~6–10",
-  logo:"https://logo.clearbit.com/ucsd.edu",
-  videoId:"RJWe5pGzmhc",
-  ytq:"UC San Diego campus tour",
-  programs:["Cognitive Science (Top 5 nationally)","Japanese Studies","Computer Science","Marine Biology","Bioengineering","Data Science"],
+  city:"La Jolla, CA",type:"Public Research University",founded:1960,
+  enrollment:"~40,000",acceptance:"~24%",tuition:"$15K / $45K",
+  gpa:"3.87",sat:"1280–1500",echs:"~6–10",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=ucsd.edu",
+  ytq:"UC San Diego UCSD campus tour",
+  programs:["Cognitive Science (Top 5)","Japanese Studies","Computer Science","Marine Biology","Bioengineering","Data Science"],
   desc:"UCSD hosts one of the most respected Cognitive Science departments in the nation — it was among the first universities to offer a CogSci degree. The campus sits on coastal cliffs in La Jolla above the Pacific. Japanese is offered through the Literature department. UCSD is #1 in the world for climate research and a global biotech hub.",
-  website:"https://www.ucsd.edu", apply:"https://admissions.ucsd.edu"
+  website:"https://www.ucsd.edu",apply:"https://admissions.ucsd.edu"
 },
 {
-  id:4, name:"UC Davis", abbr:"UCD",
-  lat:38.5382, lng:-121.7617,
+  id:4,name:"UC Davis",abbr:"UCD",lat:38.5382,lng:-121.7617,
   tags:["ca","uc","jp"],
-  city:"Davis, CA", type:"Public Research University", founded:1905,
-  enrollment:"~38,000", acceptance:"~37%", tuition:"$14K / $44K",
-  gpa:"3.83", sat:"1200–1430", echs:"~10–16",
-  logo:"https://logo.clearbit.com/ucdavis.edu",
-  videoId:null, ytq:"UC Davis campus tour",
-  programs:["Veterinary Medicine (#1 nationally)","Agriculture","Environmental Science","Japanese Studies","Neuroscience","Food Science"],
+  city:"Davis, CA",type:"Public Research University",founded:1905,
+  enrollment:"~38,000",acceptance:"~37%",tuition:"$14K / $44K",
+  gpa:"3.83",sat:"1200–1430",echs:"~10–16",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=ucdavis.edu",
+  ytq:"UC Davis campus tour",
+  programs:["Veterinary Medicine (#1)","Agriculture","Environmental Science","Japanese Studies","Neuroscience","Food Science"],
   desc:"UC Davis is set in a charming, bike-friendly college town in the Sacramento Valley. Nationally recognized for agriculture, veterinary medicine, and environmental science. Japanese language and culture are available through the East Asian Studies program. The campus is lush and green with a welcoming community feel.",
-  website:"https://www.ucdavis.edu", apply:"https://admissions.ucdavis.edu"
+  website:"https://www.ucdavis.edu",apply:"https://admissions.ucdavis.edu"
 },
 {
-  id:5, name:"UC Santa Barbara", abbr:"UCSB",
-  lat:34.4140, lng:-119.8489,
+  id:5,name:"UC Santa Barbara",abbr:"UCSB",lat:34.4140,lng:-119.8489,
   tags:["ca","uc","pres","jp"],
-  city:"Santa Barbara, CA", type:"Public Research University", founded:1909,
-  enrollment:"~26,000", acceptance:"~26%", tuition:"$14K / $44K",
-  gpa:"3.85", sat:"1230–1460", echs:"~5–9",
-  logo:"https://logo.clearbit.com/ucsb.edu",
-  videoId:null, ytq:"UC Santa Barbara campus tour",
-  programs:["Materials Science (#2 nationally)","Marine Science","Japanese Studies","Physics","Film & Media Studies","Economics"],
+  city:"Santa Barbara, CA",type:"Public Research University",founded:1909,
+  enrollment:"~26,000",acceptance:"~26%",tuition:"$14K / $44K",
+  gpa:"3.85",sat:"1230–1460",echs:"~5–9",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=ucsb.edu",
+  ytq:"UC Santa Barbara UCSB campus tour",
+  programs:["Materials Science (#2)","Marine Science","Japanese Studies","Physics","Film & Media Studies","Economics"],
   desc:"UCSB boasts one of the most beautiful campuses in the world, sitting on the Pacific Coast. Six faculty members are Nobel laureates. The East Asian Languages and Cultural Studies department offers strong Japanese language and literature programs. UCSB excels in physics, marine science, and materials.",
-  website:"https://www.ucsb.edu", apply:"https://admissions.sa.ucsb.edu"
+  website:"https://www.ucsb.edu",apply:"https://admissions.sa.ucsb.edu"
 },
 {
-  id:6, name:"UC Irvine", abbr:"UCI",
-  lat:33.6405, lng:-117.8443,
+  id:6,name:"UC Irvine",abbr:"UCI",lat:33.6405,lng:-117.8443,
   tags:["ca","uc","jp","cog"],
-  city:"Irvine, CA", type:"Public Research University", founded:1965,
-  enrollment:"~36,000", acceptance:"~26%", tuition:"$14K / $44K",
-  gpa:"3.83", sat:"1200–1440", echs:"~5–8",
-  logo:"https://logo.clearbit.com/uci.edu",
-  videoId:null, ytq:"UC Irvine campus tour",
+  city:"Irvine, CA",type:"Public Research University",founded:1965,
+  enrollment:"~36,000",acceptance:"~26%",tuition:"$14K / $44K",
+  gpa:"3.83",sat:"1200–1440",echs:"~5–8",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=uci.edu",
+  ytq:"UC Irvine UCI campus tour",
   programs:["Cognitive Sciences","Japanese Studies","Computer Science","Game Design","Criminology","Business (Paul Merage)"],
   desc:"UC Irvine is a rapidly rising research university in Orange County with one of the largest Asian-American student communities in the UC system. The Cognitive Sciences department is highly regarded. The East Asian Studies program includes comprehensive Japanese language instruction.",
-  website:"https://www.uci.edu", apply:"https://admissions.uci.edu"
+  website:"https://www.uci.edu",apply:"https://admissions.uci.edu"
 },
 {
-  id:7, name:"UC Santa Cruz", abbr:"UCSC",
-  lat:36.9916, lng:-122.0583,
+  id:7,name:"UC Santa Cruz",abbr:"UCSC",lat:36.9916,lng:-122.0583,
   tags:["ca","uc","cog"],
-  city:"Santa Cruz, CA", type:"Public Research University", founded:1965,
-  enrollment:"~19,000", acceptance:"~47%", tuition:"$14K / $44K",
-  gpa:"3.75", sat:"1160–1400", echs:"~5–10",
-  logo:"https://logo.clearbit.com/ucsc.edu",
-  videoId:null, ytq:"UC Santa Cruz campus tour",
-  programs:["Cognitive Science","Game Design (Top 10 nationally)","Computer Science","Environmental Studies","Digital Arts","Genomics"],
+  city:"Santa Cruz, CA",type:"Public Research University",founded:1965,
+  enrollment:"~19,000",acceptance:"~47%",tuition:"$14K / $44K",
+  gpa:"3.75",sat:"1160–1400",echs:"~5–10",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=ucsc.edu",
+  ytq:"UC Santa Cruz campus tour",
+  programs:["Cognitive Science","Game Design (Top 10)","Computer Science","Environmental Studies","Digital Arts","Genomics"],
   desc:"UCSC is nestled in redwood forests above Monterey Bay with a progressive, creative academic culture. The Cognitive Science program draws from computer science, linguistics, and psychology. Game design and digital arts programs are nationally ranked. The unique residential college system creates close-knit communities.",
-  website:"https://www.ucsc.edu", apply:"https://admissions.ucsc.edu"
+  website:"https://www.ucsc.edu",apply:"https://admissions.ucsc.edu"
 },
 {
-  id:8, name:"UC Riverside", abbr:"UCR",
-  lat:33.9737, lng:-117.3281,
+  id:8,name:"UC Riverside",abbr:"UCR",lat:33.9737,lng:-117.3281,
   tags:["ca","uc"],
-  city:"Riverside, CA", type:"Public Research University", founded:1954,
-  enrollment:"~26,000", acceptance:"~57%", tuition:"$14K / $44K",
-  gpa:"3.72", sat:"1100–1340", echs:"~3–6",
-  logo:"https://logo.clearbit.com/ucr.edu",
-  videoId:null, ytq:"UC Riverside campus tour",
-  programs:["Biomedical Sciences","Environmental Sciences","Engineering","Business","Education","Entomology"],
+  city:"Riverside, CA",type:"Public Research University",founded:1954,
+  enrollment:"~26,000",acceptance:"~57%",tuition:"$14K / $44K",
+  gpa:"3.72",sat:"1100–1340",echs:"~3–6",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=ucr.edu",
+  ytq:"UC Riverside campus tour",
+  programs:["Biomedical Sciences","Environmental Sciences","Engineering","Business","Entomology","Education"],
   desc:"UC Riverside is a diverse campus in the Inland Empire ranked among the nation's top universities for social mobility. Growing rapidly with new facilities, UCR excels in agricultural and environmental sciences and has an impressive track record of sending undergrads to PhD programs.",
-  website:"https://www.ucr.edu", apply:"https://admissions.ucr.edu"
+  website:"https://www.ucr.edu",apply:"https://admissions.ucr.edu"
 },
 {
-  id:9, name:"UC Merced", abbr:"UCM",
-  lat:37.3647, lng:-120.4231,
+  id:9,name:"UC Merced",abbr:"UCM",lat:37.3647,lng:-120.4231,
   tags:["ca","uc"],
-  city:"Merced, CA", type:"Public Research University", founded:2005,
-  enrollment:"~9,500", acceptance:"~70%", tuition:"$14K / $44K",
-  gpa:"3.60", sat:"1060–1290", echs:"~1–3",
-  logo:"https://logo.clearbit.com/ucmerced.edu",
-  videoId:null, ytq:"UC Merced campus tour",
-  programs:["Engineering","Environmental Systems","Cognitive Science","Management","Quantitative & Systems Biology"],
-  desc:"The newest UC campus, UC Merced offers smaller class sizes and abundant undergraduate research opportunities. Serving one of the most diverse and underrepresented student populations in California, UCM embodies the UC mission of access and excellence.",
-  website:"https://www.ucmerced.edu", apply:"https://admissions.ucmerced.edu"
+  city:"Merced, CA",type:"Public Research University",founded:2005,
+  enrollment:"~9,500",acceptance:"~70%",tuition:"$14K / $44K",
+  gpa:"3.60",sat:"1060–1290",echs:"~1–3",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=ucmerced.edu",
+  ytq:"UC Merced campus tour",
+  programs:["Engineering","Environmental Systems","Cognitive Science","Management","Quantitative Biology"],
+  desc:"The newest UC campus offers smaller class sizes and abundant undergraduate research opportunities. Serving one of the most diverse and underrepresented student populations in California, UCM embodies the UC mission of access and excellence.",
+  website:"https://www.ucmerced.edu",apply:"https://admissions.ucmerced.edu"
 },
-// ── CAL STATE ────────────────────────────────
 {
-  id:10, name:"Cal State LA", abbr:"CSULA",
-  lat:34.0672, lng:-118.1688,
+  id:10,name:"Cal State LA",abbr:"CSULA",lat:34.0672,lng:-118.1688,
   tags:["ca","csu","jp"],
-  city:"Los Angeles, CA", type:"Public University", founded:1947,
-  enrollment:"~28,000", acceptance:"~62%", tuition:"~$7K / $19K",
-  gpa:"3.30", sat:"980–1190", echs:"~2–5",
-  logo:"https://logo.clearbit.com/calstatela.edu",
-  videoId:null, ytq:"Cal State LA campus tour",
+  city:"Los Angeles, CA",type:"Public University",founded:1947,
+  enrollment:"~28,000",acceptance:"~62%",tuition:"~$7K / $19K",
+  gpa:"3.30",sat:"980–1190",echs:"~2–5",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=calstatela.edu",
+  ytq:"Cal State LA campus tour",
   programs:["Nursing","Business Administration","Engineering","Social Work","Japanese Studies","Criminal Justice"],
-  desc:"Cal State LA serves one of the most diverse student bodies in the nation in East Los Angeles. Strong programs in engineering, health sciences, and education. Japanese language courses available through Modern Languages. LA's vibrant Japanese cultural scene — from Little Tokyo to anime events — enriches student life.",
-  website:"https://www.calstatela.edu", apply:"https://www.calstatela.edu/admissions"
+  desc:"Cal State LA serves one of the most diverse student bodies in the nation in East Los Angeles. Strong programs in engineering, health sciences, and education. Japanese language courses available through Modern Languages. LA's vibrant Japanese cultural scene enriches student life.",
+  website:"https://www.calstatela.edu",apply:"https://www.calstatela.edu/admissions"
 },
 {
-  id:11, name:"Cal State Long Beach", abbr:"CSULB",
-  lat:33.7838, lng:-118.1141,
+  id:11,name:"Cal State Long Beach",abbr:"CSULB",lat:33.7838,lng:-118.1141,
   tags:["ca","csu","jp"],
-  city:"Long Beach, CA", type:"Public University", founded:1949,
-  enrollment:"~37,000", acceptance:"~39%", tuition:"~$7K / $19K",
-  gpa:"3.52", sat:"1030–1240", echs:"~2–5",
-  logo:"https://logo.clearbit.com/csulb.edu",
-  videoId:null, ytq:"Cal State Long Beach campus tour",
+  city:"Long Beach, CA",type:"Public University",founded:1949,
+  enrollment:"~37,000",acceptance:"~39%",tuition:"~$7K / $19K",
+  gpa:"3.52",sat:"1030–1240",echs:"~2–5",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=csulb.edu",
+  ytq:"Cal State Long Beach campus tour",
   programs:["Fine Arts (nationally acclaimed)","Nursing","Business","Engineering","Japanese & Asian Studies","Kinesiology"],
   desc:"CSULB is one of the largest and most selective Cal State campuses. The nationally acclaimed College of the Arts draws students from across the country. The Department of Asian & Asian American Studies offers Japanese language and cultural courses.",
-  website:"https://www.csulb.edu", apply:"https://www.csulb.edu/enrollment-services/admissions"
+  website:"https://www.csulb.edu",apply:"https://www.csulb.edu/enrollment-services/admissions"
 },
 {
-  id:12, name:"Cal State Fullerton", abbr:"CSUF",
-  lat:33.8826, lng:-117.8850,
+  id:12,name:"Cal State Fullerton",abbr:"CSUF",lat:33.8826,lng:-117.8850,
   tags:["ca","csu","jp"],
-  city:"Fullerton, CA", type:"Public University", founded:1957,
-  enrollment:"~40,000", acceptance:"~52%", tuition:"~$7K / $19K",
-  gpa:"3.40", sat:"990–1210", echs:"~1–4",
-  logo:"https://logo.clearbit.com/fullerton.edu",
-  videoId:null, ytq:"Cal State Fullerton campus tour",
+  city:"Fullerton, CA",type:"Public University",founded:1957,
+  enrollment:"~40,000",acceptance:"~52%",tuition:"~$7K / $19K",
+  gpa:"3.40",sat:"990–1210",echs:"~1–4",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=fullerton.edu",
+  ytq:"Cal State Fullerton campus tour",
   programs:["Business (Mihaylo)","Communications","Japanese Studies","Nursing","Kinesiology","Engineering"],
-  desc:"CSUF is one of the largest universities in California by enrollment, set in Orange County. Known for strong programs in business, communications, and the arts. Modern Languages offers Japanese instruction. Active Japanese cultural student organizations and proximity to large Japanese-American communities.",
-  website:"https://www.fullerton.edu", apply:"https://admissions.fullerton.edu"
+  desc:"CSUF is one of the largest universities in California by enrollment, set in Orange County. Known for strong programs in business, communications, and the arts. Modern Languages offers Japanese instruction. Active Japanese cultural student organizations on campus.",
+  website:"https://www.fullerton.edu",apply:"https://admissions.fullerton.edu"
 },
 {
-  id:13, name:"San Diego State", abbr:"SDSU",
-  lat:32.7757, lng:-117.0719,
+  id:13,name:"San Diego State",abbr:"SDSU",lat:32.7757,lng:-117.0719,
   tags:["ca","csu"],
-  city:"San Diego, CA", type:"Public University", founded:1897,
-  enrollment:"~38,000", acceptance:"~37%", tuition:"~$8K / $20K",
-  gpa:"3.58", sat:"1080–1280", echs:"~2–5",
-  logo:"https://logo.clearbit.com/sdsu.edu",
-  videoId:null, ytq:"San Diego State University campus tour",
+  city:"San Diego, CA",type:"Public University",founded:1897,
+  enrollment:"~38,000",acceptance:"~37%",tuition:"~$8K / $20K",
+  gpa:"3.58",sat:"1080–1280",echs:"~2–5",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=sdsu.edu",
+  ytq:"San Diego State University campus tour",
   programs:["Business (Fowler)","Public Health","Engineering","Media Studies","Hospitality","Nursing"],
   desc:"SDSU is one of the most selective and research-active Cal State campuses. The Fowler College of Business and School of Public Health are nationally recognized. SDSU's location in San Diego provides access to a booming biotech sector and one of the best urban college environments in the country.",
-  website:"https://www.sdsu.edu", apply:"https://admissions.sdsu.edu"
+  website:"https://www.sdsu.edu",apply:"https://admissions.sdsu.edu"
 },
 {
-  id:14, name:"Cal Poly SLO", abbr:"Cal Poly",
-  lat:35.3052, lng:-120.6625,
+  id:14,name:"Cal Poly SLO",abbr:"Cal Poly",lat:35.3052,lng:-120.6625,
   tags:["ca","csu"],
-  city:"San Luis Obispo, CA", type:"Public Polytechnic", founded:1901,
-  enrollment:"~22,000", acceptance:"~28%", tuition:"~$10K / $22K",
-  gpa:"3.77", sat:"1200–1420", echs:"~2–5",
-  logo:"https://logo.clearbit.com/calpoly.edu",
-  videoId:null, ytq:"Cal Poly San Luis Obispo campus tour",
+  city:"San Luis Obispo, CA",type:"Public Polytechnic",founded:1901,
+  enrollment:"~22,000",acceptance:"~28%",tuition:"~$10K / $22K",
+  gpa:"3.77",sat:"1200–1420",echs:"~2–5",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=calpoly.edu",
+  ytq:"Cal Poly San Luis Obispo campus tour",
   programs:["Architecture (#1 public)","Engineering","Agriculture","Business","Computer Science","Environmental Management"],
-  desc:"Cal Poly SLO's 'Learn by Doing' philosophy sets it apart. Consistently ranked #1 among public polytechnic universities in the West. Exceptional hands-on curriculum in architecture, engineering, and agriculture. The Central Coast campus is stunning with nearby wine country and beaches.",
-  website:"https://www.calpoly.edu", apply:"https://admissions.calpoly.edu"
+  desc:"Cal Poly SLO's 'Learn by Doing' philosophy sets it apart. Consistently ranked #1 among public polytechnic universities in the West with exceptional hands-on curriculum. The Central Coast campus is stunning with nearby wine country and beaches.",
+  website:"https://www.calpoly.edu",apply:"https://admissions.calpoly.edu"
 },
 {
-  id:15, name:"SF State", abbr:"SFSU",
-  lat:37.7224, lng:-122.4782,
+  id:15,name:"SF State",abbr:"SFSU",lat:37.7224,lng:-122.4782,
   tags:["ca","csu","jp"],
-  city:"San Francisco, CA", type:"Public University", founded:1899,
-  enrollment:"~26,000", acceptance:"~61%", tuition:"~$7K / $19K",
-  gpa:"3.30", sat:"970–1180", echs:"~3–7",
-  logo:"https://logo.clearbit.com/sfsu.edu",
-  videoId:null, ytq:"San Francisco State University campus tour",
-  programs:["Ethnic Studies (first in the nation)","Japanese Language","Cinema","Social Justice","Nursing","Business"],
-  desc:"SF State occupies a vibrant urban campus in one of the world's great cities. The College of Ethnic Studies — the first in the nation — reflects SFSU's commitment to diversity. Japanese is offered through Liberal & Creative Arts. Students benefit from SF's Japantown (oldest in the US) and thriving creative economy.",
-  website:"https://www.sfsu.edu", apply:"https://admissions.sfsu.edu"
+  city:"San Francisco, CA",type:"Public University",founded:1899,
+  enrollment:"~26,000",acceptance:"~61%",tuition:"~$7K / $19K",
+  gpa:"3.30",sat:"970–1180",echs:"~3–7",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=sfsu.edu",
+  ytq:"San Francisco State University campus tour",
+  programs:["Ethnic Studies (first in US)","Japanese Language","Cinema","Social Justice","Nursing","Business"],
+  desc:"SF State occupies a vibrant urban campus in one of the world's great cities. The College of Ethnic Studies — the first in the nation — reflects SFSU's commitment to diversity. Japanese is offered through Liberal & Creative Arts. Students benefit from SF's Japantown and thriving creative economy.",
+  website:"https://www.sfsu.edu",apply:"https://admissions.sfsu.edu"
 },
 {
-  id:16, name:"San Jose State", abbr:"SJSU",
-  lat:37.3352, lng:-121.8811,
+  id:16,name:"San Jose State",abbr:"SJSU",lat:37.3352,lng:-121.8811,
   tags:["ca","csu","jp"],
-  city:"San Jose, CA", type:"Public University", founded:1857,
-  enrollment:"~35,000", acceptance:"~67%", tuition:"~$7K / $19K",
-  gpa:"3.40", sat:"1010–1230", echs:"~3–6",
-  logo:"https://logo.clearbit.com/sjsu.edu",
-  videoId:null, ytq:"San Jose State University campus tour",
+  city:"San Jose, CA",type:"Public University",founded:1857,
+  enrollment:"~35,000",acceptance:"~67%",tuition:"~$7K / $19K",
+  gpa:"3.40",sat:"1010–1230",echs:"~3–6",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=sjsu.edu",
+  ytq:"San Jose State University campus tour",
   programs:["Engineering","Computer Science","Business","Japanese Studies","Nursing","Urban Planning"],
-  desc:"SJSU is California's oldest public institution, located at the heart of Silicon Valley. Strong engineering and CS programs take advantage of the surrounding tech industry. Japanese language is offered through World Languages & Literatures. Campus is located near San Jose's historic Japantown.",
-  website:"https://www.sjsu.edu", apply:"https://www.sjsu.edu/admissions"
+  desc:"SJSU is California's oldest public institution, located at the heart of Silicon Valley. Strong engineering and CS programs leverage the surrounding tech industry. Japanese language is offered through World Languages & Literatures. Campus is near San Jose's historic Japantown.",
+  website:"https://www.sjsu.edu",apply:"https://www.sjsu.edu/admissions"
 },
-// ── PRIVATE CA ────────────────────────────────
 {
-  id:17, name:"Stanford University", abbr:"Stanford",
-  lat:37.4275, lng:-122.1697,
+  id:17,name:"Stanford University",abbr:"Stanford",lat:37.4275,lng:-122.1697,
   tags:["ca","priv","pres","jp","cog"],
-  city:"Stanford, CA", type:"Private Research University", founded:1885,
-  enrollment:"~17,000", acceptance:"~4%", tuition:"~$62K",
-  gpa:"3.96", sat:"1500–1570", echs:"~0–2",
-  logo:"https://logo.clearbit.com/stanford.edu",
-  videoId:"cI6SxFbGIzI",
-  ytq:"Stanford University campus tour official",
-  programs:["Symbolic Systems (CogSci)","Japanese Studies","Computer Science","Human Biology","Product Design","Law (top 1 globally)"],
+  city:"Stanford, CA",type:"Private Research University",founded:1885,
+  enrollment:"~17,000",acceptance:"~4%",tuition:"~$62K",
+  gpa:"3.96",sat:"1500–1570",echs:"~0–2",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=stanford.edu",
+  ytq:"Stanford University campus tour admissions",
+  programs:["Symbolic Systems (CogSci)","Japanese Studies","Computer Science","Human Biology","Product Design","Law (#1)"],
   desc:"Stanford is one of the world's foremost research universities at the epicenter of Silicon Valley. The Symbolic Systems program — covering AI, linguistics, and cognitive psychology — is legendary. Japanese is taught through East Asian Languages & Cultures with strong study-abroad ties. Stanford has spawned more billion-dollar companies than any other university.",
-  website:"https://www.stanford.edu", apply:"https://admission.stanford.edu"
+  website:"https://www.stanford.edu",apply:"https://admission.stanford.edu"
 },
 {
-  id:18, name:"USC", abbr:"USC",
-  lat:34.0224, lng:-118.2851,
+  id:18,name:"USC",abbr:"USC",lat:34.0224,lng:-118.2851,
   tags:["ca","priv","pres","jp"],
-  city:"Los Angeles, CA", type:"Private Research University", founded:1880,
-  enrollment:"~48,000", acceptance:"~11%", tuition:"~$65K",
-  gpa:"3.79", sat:"1360–1530", echs:"~1–4",
-  logo:"https://logo.clearbit.com/usc.edu",
-  videoId:null, ytq:"USC University of Southern California campus tour",
+  city:"Los Angeles, CA",type:"Private Research University",founded:1880,
+  enrollment:"~48,000",acceptance:"~11%",tuition:"~$65K",
+  gpa:"3.79",sat:"1360–1530",echs:"~1–4",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=usc.edu",
+  ytq:"USC University of Southern California campus tour",
   programs:["Cinematic Arts (oldest film school)","Business (Marshall)","Engineering (Viterbi)","Japanese Studies","Architecture","Law"],
   desc:"USC is a major private research university in LA renowned for the School of Cinematic Arts, Marshall School of Business, and Viterbi Engineering. As a Pacific Rim university, USC has deep ties to Japan. The East Asian Languages & Cultures department offers rich Japanese programs.",
-  website:"https://www.usc.edu", apply:"https://admission.usc.edu"
+  website:"https://www.usc.edu",apply:"https://admission.usc.edu"
 },
 {
-  id:19, name:"Caltech", abbr:"Caltech",
-  lat:34.1377, lng:-118.1253,
+  id:19,name:"Caltech",abbr:"Caltech",lat:34.1377,lng:-118.1253,
   tags:["ca","priv","pres"],
-  city:"Pasadena, CA", type:"Private Research University", founded:1891,
-  enrollment:"~2,200", acceptance:"~3%", tuition:"~$63K",
-  gpa:"4.19", sat:"1530–1580", echs:"~0–1",
-  logo:"https://logo.clearbit.com/caltech.edu",
-  videoId:null, ytq:"Caltech campus tour",
+  city:"Pasadena, CA",type:"Private Research University",founded:1891,
+  enrollment:"~2,200",acceptance:"~3%",tuition:"~$63K",
+  gpa:"4.19",sat:"1530–1580",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=caltech.edu",
+  ytq:"Caltech California Institute of Technology campus tour",
   programs:["Physics","Engineering","Computer Science","Chemistry","Astronomy","Mathematics"],
   desc:"Caltech is among the world's most elite science and engineering universities with the highest Nobel laureate density of any institution. With only ~1,000 undergrads, the student-to-faculty ratio is 3:1. Caltech manages NASA's Jet Propulsion Laboratory. Intensely collaborative and intellectually rigorous.",
-  website:"https://www.caltech.edu", apply:"https://www.admissions.caltech.edu"
+  website:"https://www.caltech.edu",apply:"https://www.admissions.caltech.edu"
 },
 {
-  id:20, name:"Pepperdine", abbr:"Pepperdine",
-  lat:34.0358, lng:-118.6919,
+  id:20,name:"Pepperdine",abbr:"Pepperdine",lat:34.0358,lng:-118.6919,
   tags:["ca","priv"],
-  city:"Malibu, CA", type:"Private University", founded:1937,
-  enrollment:"~9,000", acceptance:"~36%", tuition:"~$63K",
-  gpa:"3.70", sat:"1230–1430", echs:"~0–2",
-  logo:"https://logo.clearbit.com/pepperdine.edu",
-  videoId:null, ytq:"Pepperdine University campus tour Malibu",
+  city:"Malibu, CA",type:"Private University",founded:1937,
+  enrollment:"~9,000",acceptance:"~36%",tuition:"~$63K",
+  gpa:"3.70",sat:"1230–1430",echs:"~0–2",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=pepperdine.edu",
+  ytq:"Pepperdine University Malibu campus tour",
   programs:["Law","Business","Public Policy","International Relations","Psychology","Communication"],
   desc:"Pepperdine has arguably the most beautiful campus in America — perched on Pacific bluffs in Malibu with stunning ocean views. A Christian university with strong programs in law, business, and public policy. Multiple international campuses make global experience central to the Pepperdine education.",
-  website:"https://www.pepperdine.edu", apply:"https://admission.pepperdine.edu"
+  website:"https://www.pepperdine.edu",apply:"https://admission.pepperdine.edu"
 },
 {
-  id:21, name:"Chapman University", abbr:"Chapman",
-  lat:33.7897, lng:-117.8531,
+  id:21,name:"Chapman University",abbr:"Chapman",lat:33.7897,lng:-117.8531,
   tags:["ca","priv"],
-  city:"Orange, CA", type:"Private University", founded:1861,
-  enrollment:"~10,000", acceptance:"~57%", tuition:"~$60K",
-  gpa:"3.65", sat:"1180–1380", echs:"~0–2",
-  logo:"https://logo.clearbit.com/chapman.edu",
-  videoId:null, ytq:"Chapman University campus tour",
-  programs:["Film & Media Arts (Dodge College)","Business (Argyros)","Law","Psychology","Music","Science & Tech"],
+  city:"Orange, CA",type:"Private University",founded:1861,
+  enrollment:"~10,000",acceptance:"~57%",tuition:"~$60K",
+  gpa:"3.65",sat:"1180–1380",echs:"~0–2",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=chapman.edu",
+  ytq:"Chapman University campus tour Orange County",
+  programs:["Film & Media Arts (Dodge)","Business (Argyros)","Law","Psychology","Music","Science & Technology"],
   desc:"Chapman is a rising private institution best known for the Dodge College of Film and Media Arts — one of the top-ranked film schools in the country. The Argyros School of Business is also strong. The beautiful historic campus in the City of Orange offers a traditional college-town environment.",
-  website:"https://www.chapman.edu", apply:"https://www.chapman.edu/admission"
+  website:"https://www.chapman.edu",apply:"https://www.chapman.edu/admission"
 },
 {
-  id:22, name:"Loyola Marymount", abbr:"LMU",
-  lat:33.9694, lng:-118.4164,
+  id:22,name:"Loyola Marymount",abbr:"LMU",lat:33.9694,lng:-118.4164,
   tags:["ca","priv","jp"],
-  city:"Los Angeles, CA", type:"Private University", founded:1911,
-  enrollment:"~10,000", acceptance:"~45%", tuition:"~$58K",
-  gpa:"3.60", sat:"1180–1360", echs:"~0–2",
-  logo:"https://logo.clearbit.com/lmu.edu",
-  videoId:null, ytq:"LMU Loyola Marymount University campus tour",
+  city:"Los Angeles, CA",type:"Private University",founded:1911,
+  enrollment:"~10,000",acceptance:"~45%",tuition:"~$58K",
+  gpa:"3.60",sat:"1180–1360",echs:"~0–2",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=lmu.edu",
+  ytq:"LMU Loyola Marymount University campus tour",
   programs:["Film & TV Production","Business","Japanese Studies","Psychology","Liberal Arts","Social Justice"],
   desc:"LMU is a Jesuit university on the bluffs above Playa del Rey in LA. Known for outstanding film & TV production, business, and liberal arts. Japanese language is offered through Modern Languages & Cultures. LMU's mission emphasizes educating the whole person for a just world.",
-  website:"https://www.lmu.edu", apply:"https://admission.lmu.edu"
+  website:"https://www.lmu.edu",apply:"https://admission.lmu.edu"
 },
 {
-  id:23, name:"Santa Clara Univ", abbr:"SCU",
-  lat:37.3496, lng:-121.9390,
+  id:23,name:"Santa Clara Univ",abbr:"SCU",lat:37.3496,lng:-121.9390,
   tags:["ca","priv","jp"],
-  city:"Santa Clara, CA", type:"Private University", founded:1851,
-  enrollment:"~9,000", acceptance:"~49%", tuition:"~$60K",
-  gpa:"3.62", sat:"1200–1420", echs:"~0–3",
-  logo:"https://logo.clearbit.com/scu.edu",
-  videoId:null, ytq:"Santa Clara University campus tour",
+  city:"Santa Clara, CA",type:"Private University",founded:1851,
+  enrollment:"~9,000",acceptance:"~49%",tuition:"~$60K",
+  gpa:"3.62",sat:"1200–1420",echs:"~0–3",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=scu.edu",
+  ytq:"Santa Clara University Silicon Valley campus tour",
   programs:["Business (Leavey)","Engineering","Japanese Studies","Law","Psychology","Computer Science"],
   desc:"California's oldest university, SCU is a Jesuit institution in the heart of Silicon Valley. The Leavey School of Business and School of Engineering are highly regarded with exceptional tech industry connections. Japanese is available through Modern Languages. Small class sizes and strong ethics curriculum.",
-  website:"https://www.scu.edu", apply:"https://www.scu.edu/admission"
+  website:"https://www.scu.edu",apply:"https://www.scu.edu/admission"
 },
-// ── PRESTIGIOUS OUT-OF-STATE ──────────────────
 {
-  id:24, name:"MIT", abbr:"MIT",
-  lat:42.3601, lng:-71.0942,
+  id:24,name:"MIT",abbr:"MIT",lat:42.3601,lng:-71.0942,
   tags:["priv","pres","cog"],
-  city:"Cambridge, MA", type:"Private Research University", founded:1861,
-  enrollment:"~11,500", acceptance:"~4%", tuition:"~$60K",
-  gpa:"4.17", sat:"1510–1580", echs:"~0–1",
-  logo:"https://logo.clearbit.com/mit.edu",
-  videoId:"Qov_0HVnBUI",
-  ytq:"MIT campus tour official",
-  programs:["Brain & Cognitive Sciences","Computer Science (#1)","Electrical Engineering","Physics","Mathematics","AI & Machine Learning"],
+  city:"Cambridge, MA",type:"Private Research University",founded:1861,
+  enrollment:"~11,500",acceptance:"~4%",tuition:"~$60K",
+  gpa:"4.17",sat:"1510–1580",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=mit.edu",
+  ytq:"MIT Massachusetts Institute of Technology campus tour",
+  programs:["Brain & Cognitive Sciences","Computer Science (#1)","Electrical Engineering","Physics","Mathematics","AI & ML"],
   desc:"MIT is the world's leading institution for science, technology, and engineering. The Department of Brain and Cognitive Sciences is world-renowned, combining computational neuroscience and AI. With 97 affiliated Nobel laureates, MIT operates at the boundary of human knowledge. The field of AI was born here.",
-  website:"https://www.mit.edu", apply:"https://admissions.mit.edu"
+  website:"https://www.mit.edu",apply:"https://admissions.mit.edu"
 },
 {
-  id:25, name:"Harvard University", abbr:"Harvard",
-  lat:42.3770, lng:-71.1167,
+  id:25,name:"Harvard University",abbr:"Harvard",lat:42.3770,lng:-71.1167,
   tags:["priv","pres","jp","cog"],
-  city:"Cambridge, MA", type:"Private Research University", founded:1636,
-  enrollment:"~23,000", acceptance:"~3%", tuition:"~$59K",
-  gpa:"3.94", sat:"1460–1580", echs:"~0–1",
-  logo:"https://logo.clearbit.com/harvard.edu",
-  videoId:null, ytq:"Harvard University campus tour",
+  city:"Cambridge, MA",type:"Private Research University",founded:1636,
+  enrollment:"~23,000",acceptance:"~3%",tuition:"~$59K",
+  gpa:"3.94",sat:"1460–1580",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=harvard.edu",
+  ytq:"Harvard University campus tour admissions",
   programs:["Japanese Studies","Cognitive Science","Law","Medicine","Economics","Government","Computer Science"],
-  desc:"Harvard, founded in 1636, is the oldest US university and a global symbol of excellence. The Department of East Asian Languages and Civilizations is one of the country's premier centers for Japanese language and literature. Mind, Brain & Behavior provides top-tier cognitive science pathways. Harvard's alumni network spans every field imaginable.",
-  website:"https://www.harvard.edu", apply:"https://college.harvard.edu/admissions"
+  desc:"Harvard, founded in 1636, is the oldest US university and a global symbol of excellence. The Department of East Asian Languages and Civilizations is one of the country's premier centers for Japanese language and literature. Mind, Brain & Behavior provides top-tier cognitive science pathways. Harvard's alumni network spans every field.",
+  website:"https://www.harvard.edu",apply:"https://college.harvard.edu/admissions"
 },
 {
-  id:26, name:"Yale University", abbr:"Yale",
-  lat:41.3163, lng:-72.9223,
+  id:26,name:"Yale University",abbr:"Yale",lat:41.3163,lng:-72.9223,
   tags:["priv","pres","jp"],
-  city:"New Haven, CT", type:"Private Research University", founded:1701,
-  enrollment:"~14,000", acceptance:"~5%", tuition:"~$65K",
-  gpa:"3.95", sat:"1450–1570", echs:"~0–1",
-  logo:"https://logo.clearbit.com/yale.edu",
-  videoId:null, ytq:"Yale University campus tour",
-  programs:["Japanese Studies","Law (#1 nationally)","Drama (#1)","Art","Medicine","Political Science"],
+  city:"New Haven, CT",type:"Private Research University",founded:1701,
+  enrollment:"~14,000",acceptance:"~5%",tuition:"~$65K",
+  gpa:"3.95",sat:"1450–1570",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=yale.edu",
+  ytq:"Yale University campus tour New Haven",
+  programs:["Japanese Studies","Law (#1)","Drama (#1)","Art","Medicine","Political Science"],
   desc:"Yale is one of the world's premier universities, legendary for humanities, law, and the arts. The Department of East Asian Languages and Literatures offers Japanese at all levels. The Council on East Asian Studies is highly active. Yale's residential college system creates an intimate community within a world-class research environment.",
-  website:"https://www.yale.edu", apply:"https://admissions.yale.edu"
+  website:"https://www.yale.edu",apply:"https://admissions.yale.edu"
 },
 {
-  id:27, name:"Princeton University", abbr:"Princeton",
-  lat:40.3431, lng:-74.6551,
+  id:27,name:"Princeton University",abbr:"Princeton",lat:40.3431,lng:-74.6551,
   tags:["priv","pres","cog"],
-  city:"Princeton, NJ", type:"Private Research University", founded:1746,
-  enrollment:"~8,300", acceptance:"~4%", tuition:"~$60K",
-  gpa:"3.95", sat:"1450–1570", echs:"~0–1",
-  logo:"https://logo.clearbit.com/princeton.edu",
-  videoId:null, ytq:"Princeton University campus tour",
-  programs:["Cognitive Science","Neuroscience","Computer Science","Mathematics","Public Policy (Woodrow Wilson)","Economics"],
+  city:"Princeton, NJ",type:"Private Research University",founded:1746,
+  enrollment:"~8,300",acceptance:"~4%",tuition:"~$60K",
+  gpa:"3.95",sat:"1450–1570",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=princeton.edu",
+  ytq:"Princeton University campus tour",
+  programs:["Cognitive Science","Neuroscience","Computer Science","Mathematics","Public Policy","Economics"],
   desc:"Princeton consistently ranks #1 or #2 nationally, distinguished by its extraordinary commitment to undergraduate education. The Princeton Neuroscience Institute offers excellent cognitive science pathways. Every senior completes an independent thesis. Princeton has the best financial aid of any Ivy — no loans.",
-  website:"https://www.princeton.edu", apply:"https://admission.princeton.edu"
+  website:"https://www.princeton.edu",apply:"https://admission.princeton.edu"
 },
 {
-  id:28, name:"Columbia University", abbr:"Columbia",
-  lat:40.8075, lng:-73.9626,
+  id:28,name:"Columbia University",abbr:"Columbia",lat:40.8075,lng:-73.9626,
   tags:["priv","pres","jp","cog"],
-  city:"New York City, NY", type:"Private Research University", founded:1754,
-  enrollment:"~36,000", acceptance:"~4%", tuition:"~$66K",
-  gpa:"3.91", sat:"1460–1580", echs:"~0–1",
-  logo:"https://logo.clearbit.com/columbia.edu",
-  videoId:null, ytq:"Columbia University NYC campus tour",
+  city:"New York City, NY",type:"Private Research University",founded:1754,
+  enrollment:"~36,000",acceptance:"~4%",tuition:"~$66K",
+  gpa:"3.91",sat:"1460–1580",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=columbia.edu",
+  ytq:"Columbia University New York City campus tour",
   programs:["Japanese Studies","Cognitive Science","Journalism (#1)","Business (CBS)","Engineering","Film Studies"],
   desc:"Columbia sits in the heart of NYC, offering unparalleled access to the world's cultural and financial capital. The Department of East Asian Languages and Cultures has one of the finest Japanese programs in the country. Mind, Brain & Behavior provides strong cognitive science pathways. The Core Curriculum is a Columbia hallmark.",
-  website:"https://www.columbia.edu", apply:"https://undergrad.admissions.columbia.edu"
+  website:"https://www.columbia.edu",apply:"https://undergrad.admissions.columbia.edu"
 },
 {
-  id:29, name:"U of Chicago", abbr:"UChicago",
-  lat:41.7886, lng:-87.5987,
+  id:29,name:"U of Chicago",abbr:"UChicago",lat:41.7886,lng:-87.5987,
   tags:["priv","pres","jp","cog"],
-  city:"Chicago, IL", type:"Private Research University", founded:1890,
-  enrollment:"~18,000", acceptance:"~5%", tuition:"~$65K",
-  gpa:"3.94", sat:"1500–1580", echs:"~0–1",
-  logo:"https://logo.clearbit.com/uchicago.edu",
-  videoId:null, ytq:"University of Chicago campus tour",
-  programs:["Cognitive Science","Japanese Studies","Economics (#1 by Nobel count)","Statistics","Philosophy","Law"],
-  desc:"UChicago is famous for its fierce intellectual culture and the legendary Core Curriculum. The Department of East Asian Languages and Civilizations offers exceptional Japanese programs. Cognitive Science spans computer science, linguistics, psychology, and philosophy. The Chicago School of Economics has produced more Nobel laureates than most countries.",
-  website:"https://www.uchicago.edu", apply:"https://collegeadmissions.uchicago.edu"
+  city:"Chicago, IL",type:"Private Research University",founded:1890,
+  enrollment:"~18,000",acceptance:"~5%",tuition:"~$65K",
+  gpa:"3.94",sat:"1500–1580",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=uchicago.edu",
+  ytq:"University of Chicago campus tour",
+  programs:["Cognitive Science","Japanese Studies","Economics (#1 Nobel count)","Statistics","Philosophy","Law"],
+  desc:"UChicago is famous for its fierce intellectual culture and the legendary Core Curriculum. The Department of East Asian Languages and Civilizations offers exceptional Japanese programs. Cognitive Science spans CS, linguistics, psychology, and philosophy. The Chicago School of Economics has produced more Nobel laureates than most countries.",
+  website:"https://www.uchicago.edu",apply:"https://collegeadmissions.uchicago.edu"
 },
 {
-  id:30, name:"Northwestern", abbr:"Northwestern",
-  lat:42.0565, lng:-87.6753,
+  id:30,name:"Northwestern",abbr:"Northwestern",lat:42.0565,lng:-87.6753,
   tags:["priv","pres","jp","cog"],
-  city:"Evanston, IL", type:"Private Research University", founded:1851,
-  enrollment:"~22,000", acceptance:"~7%", tuition:"~$63K",
-  gpa:"3.92", sat:"1450–1560", echs:"~0–1",
-  logo:"https://logo.clearbit.com/northwestern.edu",
-  videoId:null, ytq:"Northwestern University campus tour",
+  city:"Evanston, IL",type:"Private Research University",founded:1851,
+  enrollment:"~22,000",acceptance:"~7%",tuition:"~$63K",
+  gpa:"3.92",sat:"1450–1560",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=northwestern.edu",
+  ytq:"Northwestern University campus tour Evanston",
   programs:["Journalism (Medill)","Cognitive Science","Japanese","Theater (top 5)","Engineering","Business (Kellogg)"],
   desc:"Northwestern combines top-ranked academics with a spectacular campus on Lake Michigan north of Chicago. Asian Languages & Literatures offers strong Japanese programs. The Cognitive Science major is interdisciplinary, drawing from CS, linguistics, neuroscience, and philosophy. The journalism and theater schools are world-famous.",
-  website:"https://www.northwestern.edu", apply:"https://admissions.northwestern.edu"
+  website:"https://www.northwestern.edu",apply:"https://admissions.northwestern.edu"
 },
 {
-  id:31, name:"Duke University", abbr:"Duke",
-  lat:36.0014, lng:-78.9382,
+  id:31,name:"Duke University",abbr:"Duke",lat:36.0014,lng:-78.9382,
   tags:["priv","pres"],
-  city:"Durham, NC", type:"Private Research University", founded:1838,
-  enrollment:"~17,000", acceptance:"~6%", tuition:"~$63K",
-  gpa:"3.94", sat:"1460–1560", echs:"~0–1",
-  logo:"https://logo.clearbit.com/duke.edu",
-  videoId:null, ytq:"Duke University campus tour",
+  city:"Durham, NC",type:"Private Research University",founded:1838,
+  enrollment:"~17,000",acceptance:"~6%",tuition:"~$63K",
+  gpa:"3.94",sat:"1460–1560",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=duke.edu",
+  ytq:"Duke University campus tour Durham",
   programs:["Medicine","Law","Business (Fuqua)","Environmental Science","Public Policy","Neuroscience"],
   desc:"Duke is one of the nation's elite research universities with a gorgeous Gothic campus in Durham, NC. The Fuqua School of Business, Duke Law, and Duke School of Medicine are among the best in the country. The Research Triangle region is one of the most dynamic economic corridors in the Southeast.",
-  website:"https://www.duke.edu", apply:"https://admissions.duke.edu"
+  website:"https://www.duke.edu",apply:"https://admissions.duke.edu"
 },
 {
-  id:32, name:"Carnegie Mellon", abbr:"CMU",
-  lat:40.4433, lng:-79.9436,
+  id:32,name:"Carnegie Mellon",abbr:"CMU",lat:40.4433,lng:-79.9436,
   tags:["priv","pres","cog"],
-  city:"Pittsburgh, PA", type:"Private Research University", founded:1900,
-  enrollment:"~16,000", acceptance:"~11%", tuition:"~$61K",
-  gpa:"3.85", sat:"1480–1570", echs:"~0–1",
-  logo:"https://logo.clearbit.com/cmu.edu",
-  videoId:null, ytq:"Carnegie Mellon University campus tour",
-  programs:["Computer Science (#1 nationally)","AI & Robotics","Cognitive Science","Drama (#1)","Architecture","Statistics"],
-  desc:"CMU is a world leader in computer science, AI, and the performing arts. Cognitive science was born here — Herbert Simon and Allen Newell developed the first AI programs at CMU. The BrainHub research initiative is world-renowned. CMU's School of Computer Science is consistently #1 nationally, and the Drama school is equally legendary.",
-  website:"https://www.cmu.edu", apply:"https://www.cmu.edu/admission"
+  city:"Pittsburgh, PA",type:"Private Research University",founded:1900,
+  enrollment:"~16,000",acceptance:"~11%",tuition:"~$61K",
+  gpa:"3.85",sat:"1480–1570",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=cmu.edu",
+  ytq:"Carnegie Mellon University campus tour Pittsburgh",
+  programs:["Computer Science (#1)","AI & Robotics","Cognitive Science","Drama (#1)","Architecture","Statistics"],
+  desc:"CMU is a world leader in computer science, AI, and the performing arts. Cognitive science was born here — Herbert Simon and Allen Newell developed the first AI programs at CMU. The BrainHub research initiative is world-renowned. CMU's School of Computer Science is consistently #1 nationally.",
+  website:"https://www.cmu.edu",apply:"https://www.cmu.edu/admission"
 },
 {
-  id:33, name:"Johns Hopkins", abbr:"JHU",
-  lat:39.3299, lng:-76.6205,
+  id:33,name:"Johns Hopkins",abbr:"JHU",lat:39.3299,lng:-76.6205,
   tags:["priv","pres","cog"],
-  city:"Baltimore, MD", type:"Private Research University", founded:1876,
-  enrollment:"~26,000", acceptance:"~8%", tuition:"~$63K",
-  gpa:"3.90", sat:"1470–1570", echs:"~0–1",
-  logo:"https://logo.clearbit.com/jhu.edu",
-  videoId:null, ytq:"Johns Hopkins University campus tour",
+  city:"Baltimore, MD",type:"Private Research University",founded:1876,
+  enrollment:"~26,000",acceptance:"~8%",tuition:"~$63K",
+  gpa:"3.90",sat:"1470–1570",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=jhu.edu",
+  ytq:"Johns Hopkins University campus tour Baltimore",
   programs:["Biomedical Engineering (#1)","Cognitive Science","Pre-Med","Public Health (#1)","International Studies","Neuroscience"],
   desc:"America's first research university remains a world leader in medicine and biomedical research. The Cognitive Science department emphasizes language, perception, and neuroscience with direct connections to the famous medical campus. JHU's Intersections@Hopkins program encourages truly interdisciplinary research.",
-  website:"https://www.jhu.edu", apply:"https://apply.jhu.edu"
+  website:"https://www.jhu.edu",apply:"https://apply.jhu.edu"
 },
 {
-  id:34, name:"Cornell University", abbr:"Cornell",
-  lat:42.4534, lng:-76.4735,
+  id:34,name:"Cornell University",abbr:"Cornell",lat:42.4534,lng:-76.4735,
   tags:["priv","pres","jp"],
-  city:"Ithaca, NY", type:"Private Research University", founded:1865,
-  enrollment:"~25,000", acceptance:"~7%", tuition:"~$63K",
-  gpa:"3.90", sat:"1400–1550", echs:"~0–1",
-  logo:"https://logo.clearbit.com/cornell.edu",
-  videoId:null, ytq:"Cornell University campus tour Ithaca",
+  city:"Ithaca, NY",type:"Private Research University",founded:1865,
+  enrollment:"~25,000",acceptance:"~7%",tuition:"~$63K",
+  gpa:"3.90",sat:"1400–1550",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=cornell.edu",
+  ytq:"Cornell University campus tour Ithaca New York",
   programs:["Hotel Administration (#1 globally)","Japanese Studies","Industrial Labor Relations","Agriculture","Veterinary Medicine","Architecture"],
   desc:"Cornell is a unique Ivy — simultaneously a private university and a land-grant college — offering the widest undergraduate program range of any Ivy. The stunning campus in Ithaca's gorges is breathtaking. The East Asian Program offers strong Japanese courses. Cornell's schools in hotel, ILR, and agriculture exist nowhere else in the Ivy League.",
-  website:"https://www.cornell.edu", apply:"https://admissions.cornell.edu"
+  website:"https://www.cornell.edu",apply:"https://admissions.cornell.edu"
 },
 {
-  id:35, name:"Brown University", abbr:"Brown",
-  lat:41.8268, lng:-71.4025,
+  id:35,name:"Brown University",abbr:"Brown",lat:41.8268,lng:-71.4025,
   tags:["priv","pres"],
-  city:"Providence, RI", type:"Private Research University", founded:1764,
-  enrollment:"~10,700", acceptance:"~5%", tuition:"~$66K",
-  gpa:"3.94", sat:"1460–1570", echs:"~0–1",
-  logo:"https://logo.clearbit.com/brown.edu",
-  videoId:null, ytq:"Brown University campus tour Providence",
+  city:"Providence, RI",type:"Private Research University",founded:1764,
+  enrollment:"~10,700",acceptance:"~5%",tuition:"~$66K",
+  gpa:"3.94",sat:"1460–1570",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=brown.edu",
+  ytq:"Brown University campus tour Providence",
   programs:["Open Curriculum (design your own)","Neuroscience","Public Health","Computer Science","International Relations","Visual Arts"],
   desc:"Brown's Open Curriculum is unlike any other — no required courses beyond the major, letting students design a fully personalized academic experience. Strong programs in neuroscience, public health, and the humanities. Located in historic Providence, RI, 50 minutes from Boston.",
-  website:"https://www.brown.edu", apply:"https://admission.brown.edu"
+  website:"https://www.brown.edu",apply:"https://admission.brown.edu"
 },
 {
-  id:36, name:"Dartmouth College", abbr:"Dartmouth",
-  lat:43.7044, lng:-72.2887,
+  id:36,name:"Dartmouth College",abbr:"Dartmouth",lat:43.7044,lng:-72.2887,
   tags:["priv","pres","jp"],
-  city:"Hanover, NH", type:"Private Research University", founded:1769,
-  enrollment:"~6,800", acceptance:"~6%", tuition:"~$64K",
-  gpa:"3.93", sat:"1440–1560", echs:"~0–1",
-  logo:"https://logo.clearbit.com/dartmouth.edu",
-  videoId:null, ytq:"Dartmouth College campus tour",
+  city:"Hanover, NH",type:"Private Research University",founded:1769,
+  enrollment:"~6,800",acceptance:"~6%",tuition:"~$64K",
+  gpa:"3.93",sat:"1440–1560",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=dartmouth.edu",
+  ytq:"Dartmouth College campus tour New Hampshire",
   programs:["Japanese Studies","Business (Tuck MBA #1)","Engineering","Medicine","Environmental Studies","Government"],
   desc:"Dartmouth is the smallest Ivy and the most focused on undergraduate education. The Asian Societies, Cultures, and Languages program offers Japanese at all levels. The D-Plan quarter system allows extraordinary academic flexibility. The campus in the White Mountains of New Hampshire is genuinely beautiful.",
-  website:"https://www.dartmouth.edu", apply:"https://admissions.dartmouth.edu"
+  website:"https://www.dartmouth.edu",apply:"https://admissions.dartmouth.edu"
 },
 {
-  id:37, name:"Univ of Pennsylvania", abbr:"Penn",
-  lat:39.9522, lng:-75.1932,
+  id:37,name:"Univ of Pennsylvania",abbr:"Penn",lat:39.9522,lng:-75.1932,
   tags:["priv","pres","cog"],
-  city:"Philadelphia, PA", type:"Private Research University", founded:1740,
-  enrollment:"~28,000", acceptance:"~6%", tuition:"~$65K",
-  gpa:"3.90", sat:"1460–1570", echs:"~0–1",
-  logo:"https://logo.clearbit.com/upenn.edu",
-  videoId:null, ytq:"University of Pennsylvania Penn campus tour",
+  city:"Philadelphia, PA",type:"Private Research University",founded:1740,
+  enrollment:"~28,000",acceptance:"~6%",tuition:"~$65K",
+  gpa:"3.90",sat:"1460–1570",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=upenn.edu",
+  ytq:"University of Pennsylvania Penn campus tour Philadelphia",
   programs:["Business (Wharton — world's first)","Cognitive Science","Nursing","Law","Medicine","Engineering (SEAS)"],
-  desc:"Penn uniquely integrates liberal arts with professional schools under one roof. Wharton (world's first business school), Penn Law, Penn Medicine, and SEAS all collaborate. The interdisciplinary Cognitive Science program is strong. Philadelphia is one of America's most accessible and affordable major cities for students.",
-  website:"https://www.upenn.edu", apply:"https://admissions.upenn.edu"
+  desc:"Penn uniquely integrates liberal arts with professional schools under one roof. Wharton (world's first business school), Penn Law, Penn Medicine, and SEAS all collaborate. The interdisciplinary Cognitive Science program is strong. Philadelphia is one of America's most accessible major cities for students.",
+  website:"https://www.upenn.edu",apply:"https://admissions.upenn.edu"
 },
 {
-  id:38, name:"Vanderbilt", abbr:"Vandy",
-  lat:36.1447, lng:-86.8027,
+  id:38,name:"Vanderbilt",abbr:"Vandy",lat:36.1447,lng:-86.8027,
   tags:["priv","pres"],
-  city:"Nashville, TN", type:"Private Research University", founded:1873,
-  enrollment:"~14,000", acceptance:"~7%", tuition:"~$62K",
-  gpa:"3.83", sat:"1450–1570", echs:"~0–1",
-  logo:"https://logo.clearbit.com/vanderbilt.edu",
-  videoId:null, ytq:"Vanderbilt University campus tour Nashville",
+  city:"Nashville, TN",type:"Private Research University",founded:1873,
+  enrollment:"~14,000",acceptance:"~7%",tuition:"~$62K",
+  gpa:"3.83",sat:"1450–1570",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=vanderbilt.edu",
+  ytq:"Vanderbilt University campus tour Nashville Tennessee",
   programs:["Education (Peabody — #1)","Medicine","Business (Owen)","Brain Institute","Law","Engineering"],
   desc:"Vanderbilt combines elite research with the social energy of Nashville — 'Music City.' Peabody College (education) and the Vanderbilt School of Medicine are consistently top-ranked. The Vanderbilt Brain Institute is a major cognitive neuroscience center. Nashville's booming economy provides exceptional internship opportunities.",
-  website:"https://www.vanderbilt.edu", apply:"https://admissions.vanderbilt.edu"
+  website:"https://www.vanderbilt.edu",apply:"https://admissions.vanderbilt.edu"
 },
 {
-  id:39, name:"Wash U St. Louis", abbr:"WashU",
-  lat:38.6488, lng:-90.3108,
+  id:39,name:"Wash U St. Louis",abbr:"WashU",lat:38.6488,lng:-90.3108,
   tags:["priv","pres"],
-  city:"St. Louis, MO", type:"Private Research University", founded:1853,
-  enrollment:"~16,000", acceptance:"~13%", tuition:"~$63K",
-  gpa:"3.88", sat:"1500–1570", echs:"~0–1",
-  logo:"https://logo.clearbit.com/wustl.edu",
-  videoId:null, ytq:"Washington University St Louis campus tour",
+  city:"St. Louis, MO",type:"Private Research University",founded:1853,
+  enrollment:"~16,000",acceptance:"~13%",tuition:"~$63K",
+  gpa:"3.88",sat:"1500–1570",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=wustl.edu",
+  ytq:"Washington University St Louis campus tour",
   programs:["Engineering (McKelvey)","Business (Olin)","Medicine","Architecture","Social Work (#1)","Law"],
-  desc:"Washington University in St. Louis is one of the nation's elite research universities, known for generous financial aid. McKelvey Engineering, Olin Business School, and the School of Medicine are highly ranked. WashU often offers better financial aid packages than more coastal equivalents with an equally strong reputation.",
-  website:"https://www.wustl.edu", apply:"https://admissions.wustl.edu"
+  desc:"Washington University in St. Louis is one of the nation's elite research universities, known for generous financial aid. McKelvey Engineering, Olin Business School, and the School of Medicine are highly ranked. WashU often offers better financial aid packages than more coastal equivalents.",
+  website:"https://www.wustl.edu",apply:"https://admissions.wustl.edu"
 },
-// ── SPECIALISTS ────────────────────────────────
 {
-  id:40, name:"Univ of Hawaii", abbr:"UH",
-  lat:21.2969, lng:-157.8171,
+  id:40,name:"Univ of Hawaii",abbr:"UH",lat:21.2969,lng:-157.8171,
   tags:["jp","cog"],
-  city:"Honolulu, HI", type:"Public Research University", founded:1907,
-  enrollment:"~18,000", acceptance:"~56%", tuition:"~$12K / $34K",
-  gpa:"3.60", sat:"1090–1320", echs:"~0–2",
-  logo:"https://logo.clearbit.com/hawaii.edu",
-  videoId:null, ytq:"University of Hawaii Manoa campus tour",
-  programs:["Japanese Studies (top 5 nationally)","Pacific Rim Studies","Cognitive Science","Marine Biology","Astronomy","Hawaiian & Pacific Languages"],
-  desc:"UH Manoa is uniquely positioned as a Pacific crossroads institution with some of the strongest Japanese language and Pacific Rim studies programs in the nation. The East Asian Languages & Literatures department excels in Japanese studies. Cognitive Science spans psychology, linguistics, and CS. Studying here means living in paradise.",
-  website:"https://manoa.hawaii.edu", apply:"https://manoa.hawaii.edu/admissions"
+  city:"Honolulu, HI",type:"Public Research University",founded:1907,
+  enrollment:"~18,000",acceptance:"~56%",tuition:"~$12K / $34K",
+  gpa:"3.60",sat:"1090–1320",echs:"~0–2",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=hawaii.edu",
+  ytq:"University of Hawaii Manoa campus tour Honolulu",
+  programs:["Japanese Studies (top 5)","Pacific Rim Studies","Cognitive Science","Marine Biology","Astronomy","Hawaiian Studies"],
+  desc:"UH Manoa is uniquely positioned as a Pacific crossroads institution with some of the strongest Japanese language and Pacific Rim studies programs in the nation. Cognitive Science spans psychology, linguistics, and CS. Studying here means living in paradise.",
+  website:"https://manoa.hawaii.edu",apply:"https://manoa.hawaii.edu/admissions"
 },
 {
-  id:41, name:"Ohio State Univ", abbr:"OSU",
-  lat:40.0067, lng:-83.0305,
+  id:41,name:"Ohio State Univ",abbr:"OSU",lat:40.0067,lng:-83.0305,
   tags:["jp"],
-  city:"Columbus, OH", type:"Public Research University", founded:1870,
-  enrollment:"~61,000", acceptance:"~52%", tuition:"~$12K / $33K",
-  gpa:"3.80", sat:"1230–1430", echs:"~0–1",
-  logo:"https://logo.clearbit.com/osu.edu",
-  videoId:null, ytq:"Ohio State University campus tour Columbus",
-  programs:["Japanese Studies (Midwest top)","Business (Fisher)","Engineering","Public Health","Education","Agriculture"],
+  city:"Columbus, OH",type:"Public Research University",founded:1870,
+  enrollment:"~61,000",acceptance:"~52%",tuition:"~$12K / $33K",
+  gpa:"3.80",sat:"1230–1430",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=osu.edu",
+  ytq:"Ohio State University campus tour Columbus Ohio",
+  programs:["Japanese Studies (Midwest #1)","Business (Fisher)","Engineering","Public Health","Education","Agriculture"],
   desc:"Ohio State is one of the largest and most comprehensive public universities in America. The East Asian Languages & Literatures department offers one of the Midwest's strongest Japanese programs, from beginning through PhD-level seminars. OSU's massive campus provides hundreds of student organizations and Big Ten athletics.",
-  website:"https://www.osu.edu", apply:"https://undergrad.osu.edu/apply"
+  website:"https://www.osu.edu",apply:"https://undergrad.osu.edu/apply"
 },
 {
-  id:42, name:"Univ of Michigan", abbr:"UMich",
-  lat:42.2780, lng:-83.7382,
+  id:42,name:"Univ of Michigan",abbr:"UMich",lat:42.2780,lng:-83.7382,
   tags:["pres","jp","cog"],
-  city:"Ann Arbor, MI", type:"Public Research University", founded:1817,
-  enrollment:"~48,000", acceptance:"~17%", tuition:"~$18K / $57K",
-  gpa:"3.87", sat:"1360–1530", echs:"~0–1",
-  logo:"https://logo.clearbit.com/umich.edu",
-  videoId:null, ytq:"University of Michigan Ann Arbor campus tour",
+  city:"Ann Arbor, MI",type:"Public Research University",founded:1817,
+  enrollment:"~48,000",acceptance:"~17%",tuition:"~$18K / $57K",
+  gpa:"3.87",sat:"1360–1530",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=umich.edu",
+  ytq:"University of Michigan Ann Arbor campus tour",
   programs:["Cognitive Science","Japanese Studies","Business (Ross)","Engineering","Law","Pre-Med","Computer Science"],
   desc:"The University of Michigan is one of the world's top public research universities. Ann Arbor is consistently ranked the best college town in America. Asian Languages & Cultures offers comprehensive Japanese programs. The Cognition & Cognitive Neuroscience program is outstanding — often called a 'Public Ivy.'",
-  website:"https://www.umich.edu", apply:"https://admissions.umich.edu"
+  website:"https://www.umich.edu",apply:"https://admissions.umich.edu"
 },
 {
-  id:43, name:"Univ of Washington", abbr:"UW",
-  lat:47.6553, lng:-122.3035,
+  id:43,name:"Univ of Washington",abbr:"UW",lat:47.6553,lng:-122.3035,
   tags:["pres","jp","cog"],
-  city:"Seattle, WA", type:"Public Research University", founded:1861,
-  enrollment:"~50,000", acceptance:"~49%", tuition:"~$13K / $41K",
-  gpa:"3.82", sat:"1230–1460", echs:"~0–2",
-  logo:"https://logo.clearbit.com/washington.edu",
-  videoId:null, ytq:"University of Washington Seattle campus tour",
+  city:"Seattle, WA",type:"Public Research University",founded:1861,
+  enrollment:"~50,000",acceptance:"~49%",tuition:"~$13K / $41K",
+  gpa:"3.82",sat:"1230–1460",echs:"~0–2",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=washington.edu",
+  ytq:"University of Washington Seattle campus tour",
   programs:["Computer Science (#1 public)","Japanese Studies","Cognitive Science","Medicine","Oceanography","Aerospace Engineering"],
-  desc:"The University of Washington in Seattle is a top-10 public research university with exceptional strength in computer science, medicine, and oceanography. The Department of Asian Languages & Literature offers excellent Japanese enriched by Seattle's Japanese-American community. Cognitive Science integrates linguistics, psychology, and AI.",
-  website:"https://www.washington.edu", apply:"https://admissions.washington.edu"
+  desc:"The University of Washington in Seattle is a top-10 public research university with exceptional strength in CS, medicine, and oceanography. Excellent Japanese programs enriched by Seattle's Japanese-American community. Cognitive Science integrates linguistics, psychology, and AI.",
+  website:"https://www.washington.edu",apply:"https://admissions.washington.edu"
 },
 {
-  id:44, name:"Indiana University", abbr:"IU",
-  lat:39.1682, lng:-86.5234,
+  id:44,name:"Indiana University",abbr:"IU",lat:39.1682,lng:-86.5234,
   tags:["jp","cog"],
-  city:"Bloomington, IN", type:"Public Research University", founded:1820,
-  enrollment:"~45,000", acceptance:"~77%", tuition:"~$11K / $37K",
-  gpa:"3.75", sat:"1150–1380", echs:"~0–1",
-  logo:"https://logo.clearbit.com/indiana.edu",
-  videoId:null, ytq:"Indiana University Bloomington campus tour",
+  city:"Bloomington, IN",type:"Public Research University",founded:1820,
+  enrollment:"~45,000",acceptance:"~77%",tuition:"~$11K / $37K",
+  gpa:"3.75",sat:"1150–1380",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=indiana.edu",
+  ytq:"Indiana University Bloomington campus tour",
   programs:["Business (Kelley — top 5)","Music (Jacobs — top 5)","Cognitive Science","Japanese Studies","Law","Informatics"],
-  desc:"Indiana University Bloomington is renowned for the Kelley School of Business, the Jacobs School of Music, and a genuinely beautiful campus. IU has one of the strongest Cognitive Science programs in the Midwest. The Department of East Asian Languages & Cultures offers comprehensive Japanese instruction from beginner through advanced.",
-  website:"https://www.indiana.edu", apply:"https://admissions.indiana.edu"
+  desc:"Indiana University Bloomington is renowned for the Kelley School of Business, the Jacobs School of Music, and a genuinely beautiful campus. IU has one of the strongest Cognitive Science programs in the Midwest. The Department of East Asian Languages & Cultures offers comprehensive Japanese instruction.",
+  website:"https://www.indiana.edu",apply:"https://admissions.indiana.edu"
 },
 {
-  id:45, name:"Univ of Rochester", abbr:"UR",
-  lat:43.1285, lng:-77.6279,
+  id:45,name:"Univ of Rochester",abbr:"UR",lat:43.1285,lng:-77.6279,
   tags:["priv","cog","jp"],
-  city:"Rochester, NY", type:"Private Research University", founded:1850,
-  enrollment:"~12,000", acceptance:"~29%", tuition:"~$64K",
-  gpa:"3.78", sat:"1370–1530", echs:"~0–1",
-  logo:"https://logo.clearbit.com/rochester.edu",
-  videoId:null, ytq:"University of Rochester campus tour New York",
-  programs:["Brain & Cognitive Sciences (world-class)","Optics (#1 globally)","Music (Eastman — #1 globally)","Data Science","Japanese Studies"],
+  city:"Rochester, NY",type:"Private Research University",founded:1850,
+  enrollment:"~12,000",acceptance:"~29%",tuition:"~$64K",
+  gpa:"3.78",sat:"1370–1530",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=rochester.edu",
+  ytq:"University of Rochester campus tour New York",
+  programs:["Brain & Cognitive Sciences (world-class)","Optics (#1 globally)","Music (Eastman — #1)","Data Science","Japanese Studies"],
   desc:"Rochester may be the nation's best-kept secret for cognitive science. The Brain & Cognitive Sciences department is world-class with cutting-edge research in language acquisition, computational neuroscience, and visual perception. The Eastman School of Music is #1 in the world. Rochester's open curriculum lets students freely design their path.",
-  website:"https://www.rochester.edu", apply:"https://enrollment.rochester.edu/admissions"
+  website:"https://www.rochester.edu",apply:"https://enrollment.rochester.edu/admissions"
 },
 {
-  id:46, name:"Tufts University", abbr:"Tufts",
-  lat:42.4075, lng:-71.1190,
+  id:46,name:"Tufts University",abbr:"Tufts",lat:42.4075,lng:-71.1190,
   tags:["priv","pres","cog"],
-  city:"Medford, MA", type:"Private Research University", founded:1852,
-  enrollment:"~13,000", acceptance:"~11%", tuition:"~$66K",
-  gpa:"3.88", sat:"1420–1550", echs:"~0–1",
-  logo:"https://logo.clearbit.com/tufts.edu",
-  videoId:null, ytq:"Tufts University campus tour Boston",
+  city:"Medford, MA",type:"Private Research University",founded:1852,
+  enrollment:"~13,000",acceptance:"~11%",tuition:"~$66K",
+  gpa:"3.88",sat:"1420–1550",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=tufts.edu",
+  ytq:"Tufts University campus tour Boston Medford",
   programs:["Cognitive & Brain Sciences","International Relations","Pre-Med","Engineering","Child Development","Nutrition Science"],
   desc:"Tufts is a highly regarded private research university in Greater Boston, known for international relations, pre-med, and engineering. The Cognitive & Brain Sciences program connects to the extraordinary Boston-Cambridge research ecosystem — MIT, Harvard, and Mass General are all nearby.",
-  website:"https://www.tufts.edu", apply:"https://admissions.tufts.edu"
+  website:"https://www.tufts.edu",apply:"https://admissions.tufts.edu"
 },
 {
-  id:47, name:"Univ of Arizona", abbr:"UofA",
-  lat:32.2319, lng:-110.9501,
+  id:47,name:"Univ of Arizona",abbr:"UofA",lat:32.2319,lng:-110.9501,
   tags:["jp","cog"],
-  city:"Tucson, AZ", type:"Public Research University", founded:1885,
-  enrollment:"~49,000", acceptance:"~85%", tuition:"~$13K / $36K",
-  gpa:"3.40", sat:"1080–1300", echs:"~0–1",
-  logo:"https://logo.clearbit.com/arizona.edu",
-  videoId:null, ytq:"University of Arizona campus tour Tucson",
+  city:"Tucson, AZ",type:"Public Research University",founded:1885,
+  enrollment:"~49,000",acceptance:"~85%",tuition:"~$13K / $36K",
+  gpa:"3.40",sat:"1080–1300",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=arizona.edu",
+  ytq:"University of Arizona campus tour Tucson",
   programs:["Japanese Studies","Cognitive Science","Consciousness Studies (unique)","Astronomy","Optical Sciences","Anthropology"],
   desc:"UA has a nationally recognized Japanese program and a highly interdisciplinary Cognitive Science program. UA is home to the Center for Consciousness Studies — one of the world's leading consciousness research groups, hosting the renowned Tucson Conferences on the Science of Consciousness.",
-  website:"https://www.arizona.edu", apply:"https://admissions.arizona.edu"
+  website:"https://www.arizona.edu",apply:"https://admissions.arizona.edu"
 },
 {
-  id:48, name:"UT Austin", abbr:"UT",
-  lat:30.2849, lng:-97.7341,
+  id:48,name:"UT Austin",abbr:"UT",lat:30.2849,lng:-97.7341,
   tags:["pres","jp","cog"],
-  city:"Austin, TX", type:"Public Research University", founded:1883,
-  enrollment:"~51,000", acceptance:"~29%", tuition:"~$11K / $41K",
-  gpa:"3.75", sat:"1230–1470", echs:"~0–1",
-  logo:"https://logo.clearbit.com/utexas.edu",
-  videoId:null, ytq:"UT Austin University of Texas campus tour",
+  city:"Austin, TX",type:"Public Research University",founded:1883,
+  enrollment:"~51,000",acceptance:"~29%",tuition:"~$11K / $41K",
+  gpa:"3.75",sat:"1230–1470",echs:"~0–1",
+  logoUrl:"https://www.google.com/s2/favicons?sz=64&domain=utexas.edu",
+  ytq:"UT Austin University of Texas campus tour",
   programs:["Business (McCombs)","Law","Computer Science","Japanese Studies","Cognitive Science","Petroleum Engineering"],
-  desc:"UT Austin is a flagship public research university and one of the best values in higher education. The Department of Asian Studies offers excellent Japanese language and literature. Cognitive Science draws from linguistics, CS, and psychology. Austin is one of the hottest tech and music cities in America with exceptional industry ties.",
-  website:"https://www.utexas.edu", apply:"https://admissions.utexas.edu"
+  desc:"UT Austin is a flagship public research university and one of the best values in higher education. The Department of Asian Studies offers excellent Japanese language and literature. Cognitive Science draws from linguistics, CS, and psychology. Austin is one of the hottest tech and music cities in America.",
+  website:"https://www.utexas.edu",apply:"https://admissions.utexas.edu"
 },
 ];
+
+// ══════════════════════════════════════════════
+//  THEME
+// ══════════════════════════════════════════════
+let isDark = localStorage.getItem('cedar-theme') === 'dark';
+
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
+  // Swap map tiles
+  if (window._lightLayer && window._darkLayer) {
+    if (isDark) { map.removeLayer(window._lightLayer); window._darkLayer.addTo(map); }
+    else         { map.removeLayer(window._darkLayer);  window._lightLayer.addTo(map); }
+  }
+}
+
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  isDark = !isDark;
+  localStorage.setItem('cedar-theme', isDark ? 'dark' : 'light');
+  applyTheme();
+});
 
 // ══════════════════════════════════════════════
 //  LIKES
 // ══════════════════════════════════════════════
 let likedIds = new Set(JSON.parse(localStorage.getItem('cedar-likes') || '[]'));
 
-function saveLikes() {
-  localStorage.setItem('cedar-likes', JSON.stringify([...likedIds]));
-}
+function saveLikes() { localStorage.setItem('cedar-likes', JSON.stringify([...likedIds])); }
+
 function toggleLike(id) {
   likedIds.has(id) ? likedIds.delete(id) : likedIds.add(id);
   saveLikes();
@@ -1110,6 +1065,7 @@ function toggleLike(id) {
   buildMarkers();
   if (currentId === id) syncLikeBtns(id);
 }
+
 function updateLikeBadge() {
   const n = likedIds.size;
   document.getElementById('like-count-badge').textContent = n > 0 ? `(${n})` : '';
@@ -1123,12 +1079,20 @@ let markers = {};
 let currentId = null;
 
 // ══════════════════════════════════════════════
-//  MAP
+//  MAP — two tile layers for theme switching
 // ══════════════════════════════════════════════
 const map = L.map('map', { center:[38,-96], zoom:4 });
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+
+window._lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution:'© OpenStreetMap © CARTO', subdomains:'abcd', maxZoom:18
-}).addTo(map);
+});
+window._darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution:'© OpenStreetMap © CARTO', subdomains:'abcd', maxZoom:18
+});
+
+// Add correct tile for initial theme
+if (isDark) { window._darkLayer.addTo(map); }
+else         { window._lightLayer.addTo(map); }
 
 // ══════════════════════════════════════════════
 //  FILTER LOGIC
@@ -1136,33 +1100,38 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 function schoolMatches(s) {
   for (const f of activeFilters) {
     if (f === 'liked') { if (!likedIds.has(s.id)) return false; }
-    else { if (!s.tags.includes(f)) return false; }
+    else               { if (!s.tags.includes(f)) return false; }
   }
   return true;
 }
 
 // ══════════════════════════════════════════════
-//  MARKERS
+//  MARKERS — clicking opens detail panel directly
 // ══════════════════════════════════════════════
 function createMarker(s) {
   const color = markerColor(s.tags);
-  const heart = likedIds.has(s.id) ? `<span style="position:absolute;top:-4px;right:-4px;font-size:8px;background:white;border-radius:50%;width:13px;height:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.2);line-height:13px;text-align:center;">❤</span>` : '';
+  const heart = likedIds.has(s.id)
+    ? `<span style="position:absolute;top:-4px;right:-4px;font-size:8px;background:white;border-radius:50%;width:13px;height:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.25);line-height:13px;text-align:center;">❤</span>`
+    : '';
 
   const icon = L.divIcon({
     className: '',
     html: `<div style="position:relative;width:30px;height:30px;"><div class="pin" style="background:${color};">${s.abbr.substring(0,3)}</div>${heart}</div>`,
-    iconSize: [30,30], iconAnchor: [15,15], popupAnchor: [0,-18]
+    iconSize:[30,30], iconAnchor:[15,15], popupAnchor:[0,-18]
   });
 
   const marker = L.marker([s.lat, s.lng], { icon })
     .addTo(map)
-    .bindPopup(`
-      <div class="map-popup-name">${s.name}</div>
-      <div class="map-popup-sub">${s.city}</div>
-      <button class="map-popup-btn" onclick="openDetail(${s.id})">View Details →</button>
-    `, { maxWidth:200 });
+    .bindPopup(
+      `<div class="map-popup-name">${s.name}</div><div class="map-popup-sub">${s.city}</div>`,
+      { maxWidth:180, closeButton:false, autoPan:false }
+    );
 
-  marker.on('click', () => highlightRow(s.id));
+  // Single click → open detail panel AND show popup
+  marker.on('click', () => {
+    openDetail(s.id);
+  });
+
   return marker;
 }
 
@@ -1186,7 +1155,7 @@ function buildList(schools) {
   const el = document.getElementById('school-list');
   el.innerHTML = '';
   schools.forEach(s => {
-    const color = markerColor(s.tags);
+    const color   = markerColor(s.tags);
     const isLiked = likedIds.has(s.id);
     const tagHtml = s.tags.map(t =>
       `<span class="mini-tag" style="background:${TAGS[t]?.color}18;color:${TAGS[t]?.color};border:1px solid ${TAGS[t]?.color}30">${TAGS[t]?.label||t}</span>`
@@ -1234,72 +1203,53 @@ document.getElementById('clear-btn').addEventListener('click', () => {
 });
 
 // ══════════════════════════════════════════════
-//  RIGHT DETAIL PANEL
+//  LIKE SYNC
 // ══════════════════════════════════════════════
 function syncLikeBtns(id) {
   const liked = likedIds.has(id);
-  const dpBtn = document.getElementById('dp-like-btn');
-  dpBtn.textContent = liked ? '❤️' : '🤍';
-  dpBtn.classList.toggle('liked', liked);
-  dpBtn.title = liked ? 'Remove from liked' : 'Save to liked';
-
-  // Update sidebar row heart too
+  const btn = document.getElementById('dp-like-btn');
+  btn.textContent = liked ? '❤️' : '🤍';
+  btn.classList.toggle('liked', liked);
   const rowBtn = document.querySelector(`#row-${id} .like-btn`);
-  if (rowBtn) {
-    rowBtn.textContent = liked ? '❤️' : '🤍';
-    rowBtn.classList.toggle('liked', liked);
-  }
+  if (rowBtn) { rowBtn.textContent = liked ? '❤️' : '🤍'; rowBtn.classList.toggle('liked', liked); }
 }
 
-// YouTube thumbnail URL (always resolves even if video is unavailable)
-function thumbUrl(videoId) {
-  return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-}
-
+// ══════════════════════════════════════════════
+//  DETAIL PANEL
+// ══════════════════════════════════════════════
 window.openDetail = function(id) {
   const s = SCHOOLS.find(x => x.id === id);
   if (!s) return;
   currentId = id;
 
-  // Panel
+  // Open panel
   document.getElementById('detail-panel').classList.add('open');
 
-  // Header
-  const logo = document.getElementById('dp-logo');
-  const logoFb = document.getElementById('dp-logo-fallback');
-  logoFb.style.display = 'none';
-  logo.style.display = 'block';
-  logo.src = s.logo || '';
-  logoFb.textContent = s.abbr.substring(0,3);
+  // Logo: try Google favicon service, fall back to colored text badge
+  const logoWrap = document.getElementById('dp-logo-wrap');
+  const logoImg  = document.getElementById('dp-logo');
+
+  // Reset to img approach
+  logoWrap.innerHTML = `<img id="dp-logo" src="${s.logoUrl}" alt="${s.abbr}"
+    style="width:32px;height:32px;object-fit:contain;"
+    onerror="this.parentElement.innerHTML='<div style=\\'width:44px;height:44px;border-radius:10px;background:${markerColor(s.tags)};display:flex;align-items:center;justify-content:center;font-size:0.62rem;font-weight:800;color:white;letter-spacing:-0.5px;\\'>${s.abbr.substring(0,4)}</div>'"/>`;
 
   document.getElementById('dp-name').textContent = s.name;
   document.getElementById('dp-loc').textContent  = `📍 ${s.city}`;
   document.getElementById('dp-type').textContent = `${s.type} · Est. ${s.founded}`;
   syncLikeBtns(id);
 
-  // Video — lazy-load: show thumbnail, click to embed iframe
-  const vsec = document.getElementById('dp-video-section');
-  if (s.videoId) {
-    vsec.innerHTML = `
-      <div class="video-container" id="vc-${s.id}" onclick="loadVideo('${s.videoId}', 'vc-${s.id}')">
-        <img class="video-thumb" src="${thumbUrl(s.videoId)}" alt="Campus tour preview"
-             onerror="this.parentElement.querySelector('.play-label').textContent='Click to watch on YouTube'"/>
-        <div class="play-overlay">
-          <div class="play-circle">▶</div>
-          <div class="play-label">Watch Campus Tour</div>
-        </div>
-      </div>`;
-  } else {
-    const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(s.ytq)}`;
-    vsec.innerHTML = `
-      <div class="video-container" style="cursor:default;">
-        <div class="video-no-thumb">
-          <div class="play-circle">🎬</div>
-          <div class="vnt-label">${s.name} Campus Tour</div>
-          <a class="yt-open-btn" href="${ytUrl}" target="_blank" rel="noopener">Search on YouTube ↗</a>
-        </div>
-      </div>`;
-  }
+  // YouTube link card — always reliable
+  const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(s.ytq)}`;
+  document.getElementById('dp-video-section').innerHTML = `
+    <div class="yt-card">
+      <div class="yt-card-icon">🎬</div>
+      <div class="yt-card-title">${s.name} Campus Tour</div>
+      <div class="yt-card-sub">Watch official tour &amp; overview videos</div>
+      <a class="yt-btn" href="${ytUrl}" target="_blank" rel="noopener">
+        <span class="yt-btn-icon">▶</span> Watch on YouTube
+      </a>
+    </div>`;
 
   // Stats
   document.getElementById('dp-stat-grid').innerHTML = `
@@ -1307,8 +1257,8 @@ window.openDetail = function(id) {
     <div class="stat-box"><div class="stat-label">Acceptance</div><div class="stat-val">${s.acceptance}</div></div>
     <div class="stat-box"><div class="stat-label">Avg GPA</div><div class="stat-val">${s.gpa}</div><div class="stat-note">unweighted</div></div>
     <div class="stat-box"><div class="stat-label">SAT Range</div><div class="stat-val">${s.sat}</div><div class="stat-note">middle 50%</div></div>
-    <div class="stat-box"><div class="stat-label">Tuition</div><div class="stat-val" style="font-size:0.78rem;">${s.tuition}</div><div class="stat-note">in / out-of-state</div></div>
-    <div class="stat-box"><div class="stat-label">ECHS Grads</div><div class="stat-val">${s.echs}<span style="font-size:0.65rem;font-weight:400;">/yr</span></div><div class="stat-note">est. from El Cerrito HS</div></div>
+    <div class="stat-box"><div class="stat-label">Tuition</div><div class="stat-val" style="font-size:0.76rem;">${s.tuition}</div><div class="stat-note">in / out-of-state</div></div>
+    <div class="stat-box"><div class="stat-label">ECHS Grads/yr</div><div class="stat-val">${s.echs}</div><div class="stat-note">est. El Cerrito HS</div></div>
   `;
 
   // Tags
@@ -1318,7 +1268,7 @@ window.openDetail = function(id) {
 
   // Programs
   document.getElementById('dp-programs').innerHTML = (s.programs||[]).map(p =>
-    `<span class="program-tag">${p}</span>`
+    `<span class="prog-tag">${p}</span>`
   ).join('');
 
   // About
@@ -1328,40 +1278,26 @@ window.openDetail = function(id) {
   document.getElementById('dp-website').href = s.website;
   document.getElementById('dp-apply').href   = s.apply;
 
-  // Scroll to top of panel
+  // Reset scroll
   document.getElementById('detail-scroll').scrollTop = 0;
 
+  // Highlight row + open popup on marker
   highlightRow(id);
   if (markers[id]) {
-    map.setView([s.lat, s.lng], 10, { animate: true });
-    setTimeout(() => markers[id].openPopup(), 300);
+    map.setView([s.lat, s.lng], 10, { animate:true });
+    setTimeout(() => { if (markers[id]) markers[id].openPopup(); }, 300);
   }
-};
-
-// Load YouTube iframe on click (lazy)
-window.loadVideo = function(videoId, containerId) {
-  const vc = document.getElementById(containerId);
-  if (!vc || vc.querySelector('iframe')) return;
-  // Remove thumb and overlay
-  vc.querySelector('.video-thumb')?.remove();
-  vc.querySelector('.play-overlay')?.remove();
-  const iframe = document.createElement('iframe');
-  iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-  iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-  iframe.allowFullscreen = true;
-  vc.style.cursor = 'default';
-  vc.onclick = null;
-  vc.appendChild(iframe);
 };
 
 // Close panel
 document.getElementById('dp-close-btn').addEventListener('click', () => {
   document.getElementById('detail-panel').classList.remove('open');
   document.querySelectorAll('.school-row').forEach(r => r.classList.remove('highlight'));
+  if (currentId && markers[currentId]) markers[currentId].closePopup();
   currentId = null;
 });
 
-// Like from panel header
+// Like from panel
 document.getElementById('dp-like-btn').addEventListener('click', () => {
   if (currentId) toggleLike(currentId);
 });
@@ -1369,6 +1305,7 @@ document.getElementById('dp-like-btn').addEventListener('click', () => {
 // ══════════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════════
+applyTheme();
 updateLikeBadge();
 buildMarkers();
 </script>
